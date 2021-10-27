@@ -1,13 +1,37 @@
 <?php
-function View($file){
+
+use JetBrains\PhpStorm\NoReturn;
+
+function View($file , $data=null){
     return require_once (CONFIG.'/../View/'.$file.'.php') ;
+}
+function View2($filePath, $variables = array(), $print = true)
+{
+    $output = NULL;
+    $filePath= CONFIG.'/../View/'.$filePath.'.php' ;
+    if(file_exists($filePath)){
+        extract($variables);
+        ob_start();
+        include $filePath;
+        $output = ob_get_clean();
+    }
+    if ($print) {
+        print $output;
+    }
+    return $output;
+
+}
+function redirect($url='') {
+    $url=$_ENV['URL'].$url ;
+    header("location: " . $url);
+   return exit();
 }
 function autoLoader ($class ) {
     $dir='/../Flare_Libraries/';
     // don't us namespace in Global_Libraries !!!!!!!
-     if (file_exists(__DIR__.$dir.$class.'.php')) {
+    if (file_exists(__DIR__.$dir.$class.'.php')) {
         $parts = explode('\\', $class);
-    require_once __DIR__.$dir.$class.'.php';
+        require_once __DIR__.$dir.$class.'.php';
     }
 }
 function lautoLoader ($class ) {
