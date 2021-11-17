@@ -3,12 +3,12 @@
     "type": "flare-framework",
     "description": "flare-Framework",
     "keywords": ["flare-Framework"],
-    "homepage": "https://github.com/sajjadef98/Flare",
+    "homepage": "https://github.com/flare-framework/Flare",
     "minimum-stability": "dev",
     "license": "MIT",
     "authors": [
         {
-            "name": "Sajjad eftekhari",
+            "name": "Sajjad Eftekhari",
             "homepage": "https://manbaenab.ir/profile/sajjad",
             "role": "Developer"
         }
@@ -27,7 +27,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/sajjadef98/Flare"
+            "url": "https://github.com/flare-framework/Flare"
         }
     ]
 

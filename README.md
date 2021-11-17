@@ -2,7 +2,7 @@
 Made by Sajjad Eftekhari![](https://manbaenab.ir/uploads/Flare.png)
 ## What is Flare?
 
-Flare is a PHP full-stack web framework that is light, fast, flexible, and secure. 
+Flare is a PHP full-stack web framework that is light, fast, flexible, and secure.
 More information can be found at the [official site](https://manbaenab.ir/Flare).
 
 This repository holds the distributable version of the framework.
@@ -19,22 +19,22 @@ framework are exposed.
 
 ## Server Requirements
 
-PHP version 8 or higher is required, with the following extensions installed: 
+PHP version 8 or higher is required, with the following extensions installed:
 
 
 ### --------------------------------------------- Flare Framework ---------------------------------
 ## How to install
 ### you can use composer or download from https://github.com/flare-framework/Flare/releases
 ### composer create-project flare-framework/flare mysite
-# Flare built with a number of powerful and fast packages with other important features 
+# Flare built with a number of powerful and fast packages with other important features
 ### for env https://github.com/vlucas/phpdotenv
- ### for  Router and Controllers and Middlewares.i use https://github.com/izniburak/php-router
+### for  Router and Controllers and Middlewares.i use https://github.com/izniburak/php-router
 https://github.com/izniburak/php-router/wiki
-### for $db and Model 
+### for $db and Model
 ###  https://github.com/ThingEngineer/PHP-MySQLi-Database-Class
 ### https://github.com/ThingEngineer/PHP-MySQLi-Database-Class/blob/master/dbObject.md
 ### for View http://platesphp.com/
-### and  
+### and
 ### for session https://odan.github.io/session/v5/
 ### for email https://github.com/PHPMailer/PHPMailer
 ### for validation  https://respect-validation.readthedocs.io/en/latest/

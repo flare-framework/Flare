@@ -41,11 +41,7 @@ class EFTEKHARI extends Controller
 
         //        $session->start();
         //        $PHPCAP =new Captcha() ;
-                //  debug($ff);
-
-
-
-
+                //  debug($session);
 
 
 
