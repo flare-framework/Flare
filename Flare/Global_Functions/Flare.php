@@ -1,7 +1,4 @@
 <?php
-
-use JetBrains\PhpStorm\NoReturn;
-
 function View($file , $data=null){
     return require_once (CONFIG.'/../View/'.$file.'.php') ;
 }
@@ -19,7 +16,6 @@ function View2($filePath, $variables = array(), $print = true)
         print $output;
     }
     return $output;
-
 }
 function redirect($url='') {
     $url=$_ENV['URL'].$url ;
@@ -100,8 +96,6 @@ function myFunction() {
 }
 </script>
 ';
-
     }
-
 }
 
