@@ -90,8 +90,7 @@ function debug( $value ) {
             x.style.display = "none";
           }
         }
-        </script>
-        ';
+        </script>';
     }
 }
 
