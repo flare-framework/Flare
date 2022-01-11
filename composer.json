@@ -27,7 +27,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/flare-framework"
+            "url": "https://github.com/flare-framework/Flare"
         }
     ]
 

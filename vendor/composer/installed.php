@@ -5,7 +5,7 @@
         'type' => 'flare-framework',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'f7e6fb767dac1d41099e5daf9ff8f01b020547c2',
+        'reference' => '61e36101ec8f9223b0140f0f1d037e39e5ce49cf',
         'name' => 'flare-framework/flare',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'flare-framework',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'f7e6fb767dac1d41099e5daf9ff8f01b020547c2',
+            'reference' => '61e36101ec8f9223b0140f0f1d037e39e5ce49cf',
             'dev_requirement' => false,
         ),
         'graham-campbell/result-type' => array(
