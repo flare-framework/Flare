@@ -114,7 +114,7 @@
     <span   style="font-size: xx-large">
         <?php
         echo 'PHP VERSION' .PHP_VERSION  ;
-        echo 'Flare VERSION : 3.0'  ;
+        echo 'Flare VERSION : 3.0.1'  ;
         $jdf = new jdf() ;
         echo  '<br>'.$jdf->jstrftime('%c ');  ;
 
