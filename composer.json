@@ -23,12 +23,13 @@
         "phpmailer/phpmailer": "^6.5",
         "verot/class.upload.php": "^2.1",
         "tracy/tracy": "3.0.x-dev"
-    },    "repositories": [
-    {
-        "type": "vcs",
-        "url": "https://github.com/flare-framework"
-    }
-]
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/flare-framework"
+        }
+    ]
 
 
 }
