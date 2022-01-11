@@ -9,17 +9,13 @@ class EFTEKHARI extends Controller
 {
     public function index()
     {
-
         global $db,$session ;
         $templates = new Engine(CONFIG.'../View/Plates');
-
             /*
-
              dump();
                 dump($DB);
                  if you have a session exception in dump method  use this
                 debug($templates ) ;
-
                 $q= 'CREATE TABLE `first_table` (
                         `id` int(11) NOT NULL AUTO_INCREMENT,
                         `title` varchar(255) NOT NULL,
@@ -42,15 +38,6 @@ class EFTEKHARI extends Controller
         //        $session->start();
         //        $PHPCAP =new Captcha() ;
                 //  debug($ff);
-
-
-
-
-
-
-
-
-
         $data = ['welcome' => 'Flare Framework ' ] ;
         return   $templates->render('welcome',$data);
                 // or use

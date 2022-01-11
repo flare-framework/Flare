@@ -24,7 +24,7 @@ function redirect($url='') {
 }
 function autoLoader ($class ) {
     $dir='/../Flare_Libraries/';
-    // don't us namespace in Global_Libraries !!!!!!!
+    // don't use namespace in Flare_Libraries !!!!!!!
     if (file_exists(__DIR__.$dir.$class.'.php')) {
         $parts = explode('\\', $class);
         require_once __DIR__.$dir.$class.'.php';
@@ -50,16 +50,12 @@ function debug( $value ) {
         case $type === 'object' || $type === 'array':
             $ret = print_r( $value, true );
             break;
-
         case $type === 'NULL':
             $ret = $type;
             break;
-
         default:
             $ret = '[ ' . $type . ' ] ' . htmlentities( $value );
-
     }
-
     echo '<style>
   .php-debug {
     position: fixed;
@@ -86,16 +82,16 @@ function debug( $value ) {
     if (isset($ret)){
         echo '<button onclick="myFunction()">[DEBUG]</button>' . '<div id="myDEBUG"><pre class="php-debug">'.$ret . '</pre></div>';
         echo '<script>
-function myFunction() {
-  var x = document.getElementById("myDEBUG");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
-}
-</script>
-';
+        function myFunction() {
+          var x = document.getElementById("myDEBUG");
+          if (x.style.display === "none") {
+            x.style.display = "block";
+          } else {
+            x.style.display = "none";
+          }
+        }
+        </script>
+        ';
     }
 }
 

@@ -23,7 +23,7 @@ class Email
 
             //Recipients
             $mail->setFrom('from@example.com', 'Mailer');
-            $mail->addAddress('irani3057@outlook.com', 'sajjad');     //Add a recipient
+            $mail->addAddress('sajjad@sajjad.com', 'sajjad');     //Add a recipient
             $mail->addAddress('ellen@example.com');               //Name is optional
             $mail->addReplyTo('info@example.com', 'Information');
             $mail->addCC('cc@example.com');
