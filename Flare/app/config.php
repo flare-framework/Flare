@@ -30,6 +30,7 @@ if (isset($_ENV['DB_HOST'])){
         'port' => 3306,
         'prefix' =>  $_FE_prefix ,
         'charset' => 'utf8'));
+    define("URL", $_ENV['URL']);
     unset($_ENV) ;
 }
 dbObject::autoload(CONFIG."../Models");
