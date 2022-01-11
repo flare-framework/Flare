@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ed103f264be0dbe825daceab4b3b97df",
+    "content-hash": "943888321cf864920780e68f2ea87c04",
     "packages": [
         {
             "name": "graham-campbell/result-type",
@@ -1057,22 +1057,22 @@
         },
         {
             "name": "tracy/tracy",
-            "version": "v2.8.7",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/tracy.git",
-                "reference": "8e708de7c611f626c8792d43f1c78812ea24e6f6"
+                "reference": "f652faec9799675d05168de65a06111b30bd1df3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/tracy/zipball/8e708de7c611f626c8792d43f1c78812ea24e6f6",
-                "reference": "8e708de7c611f626c8792d43f1c78812ea24e6f6",
+                "url": "https://api.github.com/repos/nette/tracy/zipball/f652faec9799675d05168de65a06111b30bd1df3",
+                "reference": "f652faec9799675d05168de65a06111b30bd1df3",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "ext-session": "*",
-                "php": ">=7.2 <8.2"
+                "php": ">=8.0 <8.2"
             },
             "conflict": {
                 "nette/di": "<3.0"
@@ -1083,13 +1083,14 @@
                 "nette/mail": "^3.0",
                 "nette/tester": "^2.2",
                 "nette/utils": "^3.0",
-                "phpstan/phpstan": "^0.12",
-                "psr/log": "^1.0"
+                "phpstan/phpstan": "^1.0",
+                "psr/log": "^1.0 || ^2.0 || ^3.0"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.8-dev"
+                    "dev-master": "3.0-dev"
                 }
             },
             "autoload": {
@@ -1125,9 +1126,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nette/tracy/issues",
-                "source": "https://github.com/nette/tracy/tree/v2.8.7"
+                "source": "https://github.com/nette/tracy/tree/master"
             },
-            "time": "2021-08-24T16:26:27+00:00"
+            "time": "2022-01-10T17:18:18+00:00"
         },
         {
             "name": "verot/class.upload.php",
@@ -1259,7 +1260,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "tracy/tracy": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

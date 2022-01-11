@@ -19,11 +19,10 @@ use Tracy;
  */
 class TracyExtension extends Nette\DI\CompilerExtension
 {
-	/** @var bool */
-	private $debugMode;
+	private const ERROR_SEVERITY_PATTERN = 'E_(?:ALL|PARSE|STRICT|RECOVERABLE_ERROR|(?:CORE|COMPILE)_(?:ERROR|WARNING)|(?:USER_)?(?:ERROR|WARNING|NOTICE|DEPRECATED))';
 
-	/** @var bool */
-	private $cliMode;
+	private bool $debugMode;
+	private bool $cliMode;
 
 
 	public function __construct(bool $debugMode = false, bool $cliMode = false)
@@ -35,21 +34,25 @@ class TracyExtension extends Nette\DI\CompilerExtension
 
 	public function getConfigSchema(): Nette\Schema\Schema
 	{
+		$errorSeverity = Expect::string()->pattern(self::ERROR_SEVERITY_PATTERN);
+		$errorSeverityExpr = Expect::string()->pattern('(' . self::ERROR_SEVERITY_PATTERN . '|[ &|~()])+');
+
 		return Expect::structure([
 			'email' => Expect::anyOf(Expect::email(), Expect::listOf('email'))->dynamic(),
 			'fromEmail' => Expect::email()->dynamic(),
-			'logSeverity' => Expect::anyOf(Expect::scalar(), Expect::listOf('scalar')),
-			'editor' => Expect::string()->dynamic(),
+			'emailSnooze' => Expect::string()->dynamic(),
+			'logSeverity' => Expect::anyOf(Expect::int(), $errorSeverityExpr, Expect::listOf($errorSeverity)),
+			'editor' => Expect::type('string|null')->dynamic(),
 			'browser' => Expect::string()->dynamic(),
 			'errorTemplate' => Expect::string()->dynamic(),
-			'strictMode' => Expect::bool()->dynamic(),
+			'strictMode' => Expect::anyOf(Expect::bool(), Expect::int(), $errorSeverityExpr, Expect::listOf($errorSeverity)),
 			'showBar' => Expect::bool()->dynamic(),
 			'maxLength' => Expect::int()->dynamic(),
 			'maxDepth' => Expect::int()->dynamic(),
 			'keysToHide' => Expect::array(null)->dynamic(),
 			'dumpTheme' => Expect::string()->dynamic(),
 			'showLocation' => Expect::bool()->dynamic(),
-			'scream' => Expect::bool()->dynamic(),
+			'scream' => Expect::anyOf(Expect::bool(), Expect::int(), $errorSeverityExpr, Expect::listOf($errorSeverity)),
 			'bar' => Expect::listOf('string|Nette\DI\Definitions\Statement'),
 			'blueScreen' => Expect::listOf('callable'),
 			'editorMapping' => Expect::arrayOf('string')->dynamic()->default(null),
@@ -83,22 +86,23 @@ class TracyExtension extends Nette\DI\CompilerExtension
 
 		$options = (array) $this->config;
 		unset($options['bar'], $options['blueScreen'], $options['netteMailer']);
-		if (isset($options['logSeverity'])) {
-			$res = 0;
-			foreach ((array) $options['logSeverity'] as $level) {
-				$res |= is_int($level) ? $level : constant($level);
+
+		foreach (['logSeverity', 'strictMode', 'scream'] as $key) {
+			if (is_string($options[$key]) || is_array($options[$key])) {
+				$options[$key] = $this->parseErrorSeverity($options[$key]);
 			}
-			$options['logSeverity'] = $res;
 		}
+
 		foreach ($options as $key => $value) {
 			if ($value !== null) {
 				static $tbl = [
 					'keysToHide' => 'array_push(Tracy\Debugger::getBlueScreen()->keysToHide, ... ?)',
 					'fromEmail' => 'Tracy\Debugger::getLogger()->fromEmail = ?',
+					'emailSnooze' => 'Tracy\Debugger::getLogger()->emailSnooze = ?',
 				];
 				$initialize->addBody($builder->formatPhp(
 					($tbl[$key] ?? 'Tracy\Debugger::$' . $key . ' = ?') . ';',
-					Nette\DI\Helpers::filterArguments([$value])
+					Nette\DI\Helpers::filterArguments([$value]),
 				));
 			}
 		}
@@ -110,6 +114,7 @@ class TracyExtension extends Nette\DI\CompilerExtension
 		) {
 			$initialize->addBody($builder->formatPhp('Tracy\Debugger::setLogger(?);', [$logger]));
 		}
+
 		if ($this->config->netteMailer && $builder->getByType(Nette\Mail\IMailer::class)) {
 			$initialize->addBody($builder->formatPhp('Tracy\Debugger::getLogger()->mailer = ?;', [
 				[new Nette\DI\Statement(Tracy\Bridges\Nette\MailSender::class, ['fromEmail' => $this->config->fromEmail]), 'send'],
@@ -123,13 +128,18 @@ class TracyExtension extends Nette\DI\CompilerExtension
 				} elseif (is_string($item)) {
 					$item = new Nette\DI\Statement($item);
 				}
+
 				$initialize->addBody($builder->formatPhp(
 					'$this->getService(?)->addPanel(?);',
-					Nette\DI\Helpers::filterArguments([$this->prefix('bar'), $item])
+					Nette\DI\Helpers::filterArguments([$this->prefix('bar'), $item]),
 				));
 			}
 
-			if (!$this->cliMode && ($name = $builder->getByType(Nette\Http\Session::class))) {
+			if (
+				!$this->cliMode
+				&& Tracy\Debugger::getSessionStorage() instanceof Tracy\NativeSession
+				&& ($name = $builder->getByType(Nette\Http\Session::class))
+			) {
 				$initialize->addBody('$this->getService(?)->start();', [$name]);
 				$initialize->addBody('Tracy\Debugger::dispatch();');
 			}
@@ -138,7 +148,7 @@ class TracyExtension extends Nette\DI\CompilerExtension
 		foreach ($this->config->blueScreen as $item) {
 			$initialize->addBody($builder->formatPhp(
 				'$this->getService(?)->addPanel(?);',
-				Nette\DI\Helpers::filterArguments([$this->prefix('blueScreen'), $item])
+				Nette\DI\Helpers::filterArguments([$this->prefix('blueScreen'), $item]),
 			));
 		}
 
@@ -149,5 +159,20 @@ class TracyExtension extends Nette\DI\CompilerExtension
 		if (($dir = Tracy\Debugger::$logDirectory) && !is_writable($dir)) {
 			throw new Nette\InvalidStateException("Make directory '$dir' writable.");
 		}
+	}
+
+
+	/**
+	 * @param  string|string[]  $value
+	 */
+	private function parseErrorSeverity(string|array $value): int
+	{
+		$value = implode('|', (array) $value);
+		$res = (int) @parse_ini_string('e = ' . $value)['e']; // @ may fail
+		if (!$res) {
+			throw new Nette\InvalidStateException("Syntax error in expression '$value'");
+		}
+
+		return $res;
 	}
 }

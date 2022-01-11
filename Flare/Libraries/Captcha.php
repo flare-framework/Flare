@@ -1,7 +1,5 @@
 <?php   namespace Libraries  ;
 
-
-
 class Captcha {
     // (A) PRIME THE CAPTCHA - GENERATE RANDOM STRING IN SESSION
     function prime ($length=8) {

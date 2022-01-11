@@ -1,8 +1,8 @@
 var settings = {
 
 	// PhpStorm
-	editor: '"C:\\Program Files\\JetBrains\\PhpStorm 2021.1.3\\bin\\phpstorm64.exe" --line %line% "%file%"',
-	title: 'PhpStorm',
+	// editor: '"C:\\Program Files\\JetBrains\\PhpStorm 2018.1.2\\bin\\phpstorm64.exe" --line %line% "%file%"',
+	// title: 'PhpStorm',
 
 	// NetBeans
 	// editor: '"C:\\Program Files\\NetBeans 8.1\\bin\\netbeans.exe" "%file%:%line%" --console suppress',
@@ -29,7 +29,7 @@ var settings = {
 	// editor: '"C:\\Program Files\\Microsoft VS Code\\Code.exe" --goto "%file%:%line%"',
 
 	mappings: {
-		'/remotepath': '/localpath'
+		// '/remotepath': '/localpath'
 	}
 };
 
@@ -68,7 +68,7 @@ for (var id in settings.mappings) {
 
 if (action === 'create' && !fileSystem.FileExists(file)) {
 	shell.Run('cmd /c mkdir "' + fileSystem.GetParentFolderName(file) + '"', 0, 1);
-	fileSystem.CreateTextFile(file);
+	fileSystem.CreateTextFile(file).Write(replace);
 
 } else if (action === 'fix') {
 	var lines = fileSystem.OpenTextFile(file).ReadAll().split('\n');

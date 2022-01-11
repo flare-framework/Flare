@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Tracy;
 
+use Ds;
 use Tracy\Dumper\Describer;
 use Tracy\Dumper\Exposer;
 use Tracy\Dumper\Renderer;
@@ -33,7 +34,8 @@ class Dumper
 		DEBUGINFO = 'debuginfo', // use magic method __debugInfo if exists (defaults to false)
 		KEYS_TO_HIDE = 'keystohide', // sensitive keys not displayed (defaults to [])
 		SCRUBBER = 'scrubber', // detects sensitive keys not to be displayed
-		THEME = 'theme'; // color theme (defaults to light)
+		THEME = 'theme', // color theme (defaults to light)
+		HASH = 'hash'; // show object and reference hashes (defaults to true)
 
 	public const
 		LOCATION_CLASS = 0b0001, // shows where classes are defined
@@ -44,10 +46,9 @@ class Dumper
 		HIDDEN_VALUE = Describer::HIDDEN_VALUE;
 
 	/** @var Dumper\Value[] */
-	public static $liveSnapshot = [];
+	public static array $liveSnapshot = [];
 
-	/** @var array */
-	public static $terminalColors = [
+	public static ?array $terminalColors = [
 		'bool' => '1;33',
 		'null' => '1;33',
 		'number' => '1;32',
@@ -63,15 +64,13 @@ class Dumper
 		'indent' => '1;30',
 	];
 
-	/** @var array */
-	public static $resources = [
+	public static array $resources = [
 		'stream' => 'stream_get_meta_data',
 		'stream-context' => 'stream_context_get_options',
 		'curl' => 'curl_getinfo',
 	];
 
-	/** @var array */
-	public static $objectExporters = [
+	public static array $objectExporters = [
 		\Closure::class => [Exposer::class, 'exposeClosure'],
 		\UnitEnum::class => [Exposer::class, 'exposeEnum'],
 		\ArrayObject::class => [Exposer::class, 'exposeArrayObject'],
@@ -81,24 +80,21 @@ class Dumper
 		\DOMNode::class => [Exposer::class, 'exposeDOMNode'],
 		\DOMNodeList::class => [Exposer::class, 'exposeDOMNodeList'],
 		\DOMNamedNodeMap::class => [Exposer::class, 'exposeDOMNodeList'],
-		\Ds\Collection::class => [Exposer::class, 'exposeDsCollection'],
-		\Ds\Map::class => [Exposer::class, 'exposeDsMap'],
+		Ds\Collection::class => [Exposer::class, 'exposeDsCollection'],
+		Ds\Map::class => [Exposer::class, 'exposeDsMap'],
 	];
 
-	/** @var Describer */
-	private $describer;
-
-	/** @var Renderer */
-	private $renderer;
+	private Describer $describer;
+	private Renderer $renderer;
 
 
 	/**
 	 * Dumps variable to the output.
 	 * @return mixed  variable
 	 */
-	public static function dump($var, array $options = [])
+	public static function dump($var, array $options = []): mixed
 	{
-		if (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg') {
+		if (Helpers::isCli()) {
 			$useColors = self::$terminalColors && Helpers::detectColors();
 			$dumper = new self($options);
 			fwrite(STDOUT, $dumper->asTerminal($var, $useColors ? self::$terminalColors : []));
@@ -107,10 +103,11 @@ class Dumper
 			echo self::toText($var, $options);
 
 		} else { // html
-			$options[self::LOCATION] = $options[self::LOCATION] ?? true;
+			$options[self::LOCATION] ??= true;
 			self::renderAssets();
 			echo self::toHtml($var, $options);
 		}
+
 		return $var;
 	}
 
@@ -151,17 +148,18 @@ class Dumper
 		if (Debugger::$productionMode === true || $sent) {
 			return;
 		}
+
 		$sent = true;
 
 		$nonce = Helpers::getNonce();
 		$nonceAttr = $nonce ? ' nonce="' . Helpers::escapeHtml($nonce) . '"' : '';
-		$s = file_get_contents(__DIR__ . '/../Toggle/toggle.css')
+		$s = file_get_contents(__DIR__ . '/../assets/toggle.css')
 			. file_get_contents(__DIR__ . '/assets/dumper-light.css')
 			. file_get_contents(__DIR__ . '/assets/dumper-dark.css');
 		echo "<style{$nonceAttr}>", str_replace('</', '<\/', Helpers::minifyCss($s)), "</style>\n";
 
 		if (!Debugger::isEnabled()) {
-			$s = '(function(){' . file_get_contents(__DIR__ . '/../Toggle/toggle.js') . '})();'
+			$s = '(function(){' . file_get_contents(__DIR__ . '/../assets/toggle.js') . '})();'
 				. '(function(){' . file_get_contents(__DIR__ . '/../Dumper/assets/dumper.js') . '})();';
 			echo "<script{$nonceAttr}>", str_replace(['<!--', '</s'], ['<\!--', '<\/s'], Helpers::minifyJs($s)), "</script>\n";
 		}
@@ -188,9 +186,10 @@ class Dumper
 		} elseif (isset($options[self::SNAPSHOT])) {
 			$tmp = &$options[self::SNAPSHOT];
 		}
+
 		if (isset($tmp)) {
-			$tmp[0] = $tmp[0] ?? [];
-			$tmp[1] = $tmp[1] ?? [];
+			$tmp[0] ??= [];
+			$tmp[1] ??= [];
 			$describer->snapshot = &$tmp[0];
 			$describer->references = &$tmp[1];
 		}
@@ -204,7 +203,8 @@ class Dumper
 			: ($options[self::LAZY] ?? $renderer->lazy);
 		$renderer->sourceLocation = !(~$location & self::LOCATION_SOURCE);
 		$renderer->classLocation = !(~$location & self::LOCATION_CLASS);
-		$renderer->theme = $options[self::THEME] ?? $renderer->theme;
+		$renderer->theme = ($options[self::THEME] ?? $renderer->theme) ?: null;
+		$renderer->hash = $options[self::HASH] ?? true;
 	}
 
 
@@ -219,6 +219,7 @@ class Dumper
 			$model = $this->describer->describe([$key => $var]);
 			$model->value = $model->value[0][1];
 		}
+
 		return $this->renderer->renderAsHtml($model);
 	}
 

@@ -5,7 +5,7 @@
         'type' => 'flare-framework',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'fb2feafe8cfe16e4d85325b1c6d5aaa245033949',
+        'reference' => '80854b160ffb5897d917845e76edd8934e373491',
         'name' => 'flare-framework/flare',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'flare-framework',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'fb2feafe8cfe16e4d85325b1c6d5aaa245033949',
+            'reference' => '80854b160ffb5897d917845e76edd8934e373491',
             'dev_requirement' => false,
         ),
         'graham-campbell/result-type' => array(
@@ -164,12 +164,14 @@
             'dev_requirement' => false,
         ),
         'tracy/tracy' => array(
-            'pretty_version' => 'v2.8.7',
-            'version' => '2.8.7.0',
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tracy/tracy',
-            'aliases' => array(),
-            'reference' => '8e708de7c611f626c8792d43f1c78812ea24e6f6',
+            'aliases' => array(
+                0 => '3.0.x-dev',
+            ),
+            'reference' => 'f652faec9799675d05168de65a06111b30bd1df3',
             'dev_requirement' => false,
         ),
         'verot/class.upload.php' => array(

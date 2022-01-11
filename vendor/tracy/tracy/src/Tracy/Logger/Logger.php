@@ -15,29 +15,25 @@ namespace Tracy;
  */
 class Logger implements ILogger
 {
-	/** @var string|null name of the directory where errors should be logged */
-	public $directory;
+	/** name of the directory where errors should be logged */
+	public ?string $directory = null;
 
-	/** @var string|array|null email or emails to which send error notifications */
-	public $email;
+	/** email or emails to which send error notifications */
+	public string|array|null $email = null;
 
-	/** @var string|null sender of email notifications */
-	public $fromEmail;
+	/** sender of email notifications */
+	public ?string $fromEmail = null;
 
-	/** @var mixed interval for sending email is 2 days */
-	public $emailSnooze = '2 days';
+	/** interval for sending email is 2 days */
+	public mixed $emailSnooze = '2 days';
 
 	/** @var callable handler for sending emails */
 	public $mailer;
 
-	/** @var BlueScreen|null */
-	private $blueScreen;
+	private ?BlueScreen $blueScreen = null;
 
 
-	/**
-	 * @param  string|array|null  $email
-	 */
-	public function __construct(?string $directory, $email = null, BlueScreen $blueScreen = null)
+	public function __construct(?string $directory, string|array|null $email = null, ?BlueScreen $blueScreen = null)
 	{
 		$this->directory = $directory;
 		$this->email = $email;
@@ -82,10 +78,7 @@ class Logger implements ILogger
 	}
 
 
-	/**
-	 * @param  mixed  $message
-	 */
-	public static function formatMessage($message): string
+	public static function formatMessage(mixed $message): string
 	{
 		if ($message instanceof \Throwable) {
 			foreach (Helpers::getExceptionChain($message) as $exception) {
@@ -94,6 +87,7 @@ class Logger implements ILogger
 					: Helpers::getClass($exception) . ': ' . $exception->getMessage() . ($exception->getCode() ? ' #' . $exception->getCode() : '')
 				) . ' in ' . $exception->getFile() . ':' . $exception->getLine();
 			}
+
 			$message = implode("\ncaused by ", $tmp);
 
 		} elseif (!is_string($message)) {
@@ -104,10 +98,7 @@ class Logger implements ILogger
 	}
 
 
-	/**
-	 * @param  mixed  $message
-	 */
-	public static function formatLogLine($message, string $exceptionFile = null): string
+	public static function formatLogLine(mixed $message, ?string $exceptionFile = null): string
 	{
 		return implode(' ', [
 			date('[Y-m-d H-i-s]'),
@@ -122,10 +113,11 @@ class Logger implements ILogger
 	{
 		foreach (Helpers::getExceptionChain($exception) as $exception) {
 			$data[] = [
-				get_class($exception), $exception->getMessage(), $exception->getCode(), $exception->getFile(), $exception->getLine(),
+				$exception::class, $exception->getMessage(), $exception->getCode(), $exception->getFile(), $exception->getLine(),
 				array_map(function (array $item): array { unset($item['args']); return $item; }, $exception->getTrace()),
 			];
 		}
+
 		$hash = substr(md5(serialize($data)), 0, 10);
 		$dir = strtr($this->directory . '/', '\\/', DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR);
 		foreach (new \DirectoryIterator($this->directory) as $file) {
@@ -133,6 +125,7 @@ class Logger implements ILogger
 				return $dir . $file;
 			}
 		}
+
 		return $dir . $level . '--' . date('Y-m-d--H-i') . "--$hash.html";
 	}
 
@@ -141,7 +134,7 @@ class Logger implements ILogger
 	 * Logs exception to the file if file doesn't exist.
 	 * @return string logged error filename
 	 */
-	protected function logException(\Throwable $exception, string $file = null): string
+	protected function logException(\Throwable $exception, ?string $file = null): string
 	{
 		$file = $file ?: $this->getExceptionFile($exception);
 		$bs = $this->blueScreen ?: new BlueScreen;
@@ -150,10 +143,7 @@ class Logger implements ILogger
 	}
 
 
-	/**
-	 * @param  mixed  $message
-	 */
-	protected function sendEmail($message): void
+	protected function sendEmail(mixed $message): void
 	{
 		$snooze = is_numeric($this->emailSnooze)
 			? $this->emailSnooze
@@ -172,10 +162,9 @@ class Logger implements ILogger
 
 	/**
 	 * Default mailer.
-	 * @param  mixed  $message
 	 * @internal
 	 */
-	public function defaultMailer($message, string $email): void
+	public function defaultMailer(mixed $message, string $email): void
 	{
 		$host = preg_replace('#[^\w.-]+#', '', $_SERVER['SERVER_NAME'] ?? php_uname('n'));
 		$parts = str_replace(
@@ -190,7 +179,7 @@ class Logger implements ILogger
 				]) . "\n",
 				'subject' => "PHP: An error occurred on the server $host",
 				'body' => static::formatMessage($message) . "\n\nsource: " . Helpers::getSource(),
-			]
+			],
 		);
 
 		mail($email, $parts['subject'], $parts['body'], $parts['headers']);

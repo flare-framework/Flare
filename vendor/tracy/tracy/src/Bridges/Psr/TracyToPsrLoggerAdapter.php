@@ -30,8 +30,7 @@ class TracyToPsrLoggerAdapter extends Psr\Log\AbstractLogger
 		Psr\Log\LogLevel::DEBUG => Tracy\ILogger::DEBUG,
 	];
 
-	/** @var Tracy\ILogger */
-	private $tracyLogger;
+	private Tracy\ILogger $tracyLogger;
 
 
 	public function __construct(Tracy\ILogger $tracyLogger)
@@ -40,7 +39,7 @@ class TracyToPsrLoggerAdapter extends Psr\Log\AbstractLogger
 	}
 
 
-	public function log($level, $message, array $context = [])
+	public function log($level, $message, array $context = []): void
 	{
 		$level = self::LEVEL_MAP[$level] ?? Tracy\ILogger::ERROR;
 
