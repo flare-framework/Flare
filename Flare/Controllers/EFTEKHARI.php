@@ -3,7 +3,7 @@ namespace Controllers;
 //use Respect\Validation\Validator as v;
 //use Email ;
 //use Libraries\Captcha ;
-class BaseController
+class EFTEKHARI
 {
     public function index()
     {
@@ -13,7 +13,7 @@ class BaseController
        return View('Layout/w-layout',$data) ;
     }
     public function alldata() {
-        View2('home') ;
+        View('home') ;
     }
     public function alldata2() {
         // Array with names
