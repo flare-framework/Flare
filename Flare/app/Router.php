@@ -1,14 +1,21 @@
 <?php
-
-$router = new Bramus\Router\Router() ;
+use Bramus\Router\Router;
+$router = new Router() ;
 $router->setNamespace('Controllers');
-$router->get('/','BaseController@index');
-$router->get('/home','BaseController@alldata');
-$router->post('/ajax','BaseController@alldata2');
+//  Middlewares
 
+$router->before('GET|POST', '/about', function() {
+  \Middlewares\AdminFilter::filter();
+});
+//Controllers
 
+$router->get('/','Home@index');
+$router->get('/latte','Home@lattev');
+$router->get('/ajax','Home@alldata');
+$router->post('/ajax','Home@alldata2' );
+$router->get('/debug','Home@debugbar' );
 $router->get('/about', function() {
-    echo 'Powerful like the king';
+    echo 'Powerful like the king !';
 });
 
 $router->set404(function() {

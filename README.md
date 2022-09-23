@@ -1,4 +1,4 @@
-# Flare Framework 4.0.0
+# Flare Framework 4.2.0
 Developer by Sajjad Eftekhari![](https://manbaenab.ir/uploads/Flare.png)
 ## What is Flare?
 
@@ -21,8 +21,10 @@ PHP version 8 or higher is required, with the following extensions installed:
 ### https://github.com/ThingEngineer/PHP-MySQLi-Database-Class/blob/master/dbObject.md
 ### and  
 ### for session https://odan.github.io/session/v5/
+### for Templating engine Latte https://latte.nette.org/
 ### for email https://github.com/PHPMailer/PHPMailer
 ### for validation  https://respect-validation.readthedocs.io/en/latest/
 ### for upload https://github.com/verot/class.upload.php
 ### for debug https://github.com/symfony/symfony/tree/6.2/src/Symfony/Component/ErrorHandler
+### for Debug Bar http://phpdebugbar.com/docs/
 

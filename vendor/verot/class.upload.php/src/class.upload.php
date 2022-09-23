@@ -501,6 +501,14 @@ class Upload {
     var $file_max_size;
 
     /**
+     * Max file size, from php.ini
+     *
+     * @access private
+     * @var double
+     */
+    var $file_max_size_raw;
+
+    /**
      * Set this variable to true to resize the file if it is an image
      *
      * You will probably want to set {@link image_x} and {@link image_y}, and maybe one of the ratio variables
@@ -1884,6 +1892,8 @@ class Upload {
             'bat',
             'phar',
             'wsdl',
+            'html',
+            'htm',
         );
         
         $this->forbidden = array_merge($this->dangerous, array(
@@ -2022,6 +2032,7 @@ class Upload {
             'mpg' => 'video/mpeg',
             'mpe' => 'video/mpeg',
             'mp3' => 'audio/mpeg3',
+            'mp4' => 'video/mp4',
             'wav' => 'audio/wav',
             'aiff' => 'audio/aiff',
             'aif' => 'audio/aiff',
@@ -2109,7 +2120,7 @@ class Upload {
      */
     function upload($file, $lang = 'en_GB') {
 
-        $this->version            = '30/08/2022';
+        $this->version            = '07/12/2023';
 
         $this->file_src_name      = '';
         $this->file_src_name_body = '';
@@ -5230,5 +5241,3 @@ class Upload {
         return true;
     }
 }
-
-?>

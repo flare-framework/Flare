@@ -1,11 +1,11 @@
-<?php
+<?php  namespace Libraries  ;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 class Email
 {
-
+//This is not a real method and only a few features of the phpMailer class are introduced.
     public function Email()
     {
         $mail = new PHPMailer(true);
@@ -23,15 +23,16 @@ class Email
 
             //Recipients
             $mail->setFrom('from@example.com', 'Mailer');
-            $mail->addAddress('sajjad@sajjad.com', 'sajjad');     //Add a recipient
+            $mail->addAddress('from@example.com', 'Mailer');     //Add a recipient
             $mail->addAddress('ellen@example.com');               //Name is optional
             $mail->addReplyTo('info@example.com', 'Information');
             $mail->addCC('cc@example.com');
             $mail->addBCC('bcc@example.com');
 
             //Attachments
-              $mail->addAttachment('/var/tmp/file.tar.gz');         //Add attachments
-              $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    //Optional name
+
+          //    $mail->addAttachment('/var/tmp/file.tar.gz');         //Add attachments
+          //    $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    //Optional name
 
             //Content
             $mail->isHTML(true);                                  //Set email format to HTML

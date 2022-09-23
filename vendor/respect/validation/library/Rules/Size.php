@@ -1,12 +1,8 @@
 <?php
 
 /*
- * This file is part of Respect/Validation.
- *
- * (c) Alexandre Gomes Gaigalas <alexandre@gaigalas.net>
- *
- * For the full copyright and license information, please view the LICENSE file
- * that was distributed with this source code.
+ * Copyright (c) Alexandre Gomes Gaigalas <alganet@gmail.com>
+ * SPDX-License-Identifier: MIT
  */
 
 declare(strict_types=1);
@@ -19,6 +15,7 @@ use Respect\Validation\Exceptions\ComponentException;
 use SplFileInfo;
 
 use function filesize;
+use function floatval;
 use function is_numeric;
 use function is_string;
 use function preg_match;
@@ -60,9 +57,9 @@ final class Size extends AbstractRule
     public function __construct($minSize = null, $maxSize = null)
     {
         $this->minSize = $minSize;
-        $this->minValue = $minSize ? $this->toBytes($minSize) : null;
+        $this->minValue = $minSize ? $this->toBytes((string) $minSize) : null;
         $this->maxSize = $maxSize;
-        $this->maxValue = $maxSize ? $this->toBytes($maxSize) : null;
+        $this->maxValue = $maxSize ? $this->toBytes((string) $maxSize) : null;
     }
 
     /**
@@ -71,19 +68,19 @@ final class Size extends AbstractRule
     public function validate($input): bool
     {
         if ($input instanceof SplFileInfo) {
-            return $this->isValidSize($input->getSize());
+            return $this->isValidSize((float) $input->getSize());
         }
 
         if ($input instanceof UploadedFileInterface) {
-            return $this->isValidSize($input->getSize());
+            return $this->isValidSize((float) $input->getSize());
         }
 
         if ($input instanceof StreamInterface) {
-            return $this->isValidSize($input->getSize());
+            return $this->isValidSize((float) $input->getSize());
         }
 
         if (is_string($input)) {
-            return $this->isValidSize((int) filesize($input));
+            return $this->isValidSize((float) filesize($input));
         }
 
         return false;
@@ -92,22 +89,21 @@ final class Size extends AbstractRule
     /**
      * @todo Move it to a trait
      *
-     * @param mixed $size
      */
-    private function toBytes($size): float
+    private function toBytes(string $size): float
     {
         $value = $size;
         $units = ['b', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb'];
         foreach ($units as $exponent => $unit) {
-            if (!preg_match('/^(\d+(.\d+)?)' . $unit . '$/i', (string) $size, $matches)) {
+            if (!preg_match('/^(\d+(.\d+)?)' . $unit . '$/i', $size, $matches)) {
                 continue;
             }
-            $value = $matches[1] * 1024 ** $exponent;
+            $value = floatval($matches[1]) * 1024 ** $exponent;
             break;
         }
 
         if (!is_numeric($value)) {
-            throw new ComponentException(sprintf('"%s" is not a recognized file size.', (string) $size));
+            throw new ComponentException(sprintf('"%s" is not a recognized file size.', $size));
         }
 
         return (float) $value;
