@@ -1128,18 +1128,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/verot/class.upload.php.git",
-                "reference": "c8e63e96ebe32bb67d40800d91a073be00ada3c3"
+                "reference": "ef7936caa1ed51fccf611a3908fb6d4b7bb5b89c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/verot/class.upload.php/zipball/c8e63e96ebe32bb67d40800d91a073be00ada3c3",
-                "reference": "c8e63e96ebe32bb67d40800d91a073be00ada3c3",
+                "url": "https://api.github.com/repos/verot/class.upload.php/zipball/ef7936caa1ed51fccf611a3908fb6d4b7bb5b89c",
+                "reference": "ef7936caa1ed51fccf611a3908fb6d4b7bb5b89c",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3"
             },
-            "time": "2022-08-30T12:44:48+00:00",
+            "time": "2022-09-02T13:10:40+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

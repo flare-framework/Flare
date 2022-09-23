@@ -3,17 +3,17 @@ namespace Controllers;
 //use Respect\Validation\Validator as v;
 //use Email ;
 //use Libraries\Captcha ;
-class EFTEKHARI
+class BaseController
 {
     public function index()
     {
-        global $db,$session ;
+        // global $db,$session ;
         $data2 =['welcome' => 'Flare Framework '  ];
         $data = ['content'=> View('Layout/welcome',$data2) ,'title' => 'Flare Framework ' ] ;
        return View('Layout/w-layout',$data) ;
     }
     public function alldata() {
-        View('home') ;
+        return View('home') ;
     }
     public function alldata2() {
         // Array with names

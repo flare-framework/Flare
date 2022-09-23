@@ -5,7 +5,7 @@
         'type' => 'flare-framework',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '966a374f39aab060a57c58d6face09752939429c',
+        'reference' => '936b0acea8ad5c0fa57ac5b769c718c51c795d5b',
         'name' => 'flare-framework/flare',
         'dev' => true,
     ),
@@ -25,7 +25,7 @@
             'type' => 'flare-framework',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '966a374f39aab060a57c58d6face09752939429c',
+            'reference' => '936b0acea8ad5c0fa57ac5b769c718c51c795d5b',
             'dev_requirement' => false,
         ),
         'graham-campbell/result-type' => array(
@@ -185,7 +185,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../verot/class.upload.php',
             'aliases' => array(),
-            'reference' => 'c8e63e96ebe32bb67d40800d91a073be00ada3c3',
+            'reference' => 'ef7936caa1ed51fccf611a3908fb6d4b7bb5b89c',
             'dev_requirement' => false,
         ),
         'vlucas/phpdotenv' => array(

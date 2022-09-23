@@ -1,6 +1,8 @@
 <?php
 
-$router = new Bramus\Router\Router() ;
+use Bramus\Router\Router;
+
+$router = new Router() ;
 $router->setNamespace('Controllers');
 $router->get('/','BaseController@index');
 $router->get('/home','BaseController@alldata');
@@ -11,8 +13,8 @@ $router->get('/about', function() {
     echo 'Powerful like the king';
 });
 
-$router->set404(function() {
-   return View2('404/404') ;
-});
+//$router->set404(function() {
+//   return View2('404/404') ;
+//});
 
 $router->run();
