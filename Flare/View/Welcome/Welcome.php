@@ -110,17 +110,12 @@
     <span>
    Flare Framework<br>
         <img src="Flare.png" alt="honorary- logo" width="20%" height="20%">
-  </span><br>
     <span   style="font-size: xx-large">
         <?php
-        echo 'PHP VERSION' .PHP_VERSION  ;
-        echo 'Flare VERSION : 3.0.2'  ;
+        echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION : 4.0.0'  ;
         $jdf = new jdf() ;
-        echo  '<br>'.$jdf->jstrftime('%c ');  ;
-
-        ?>
-©  Sajjad eftekhari <?= date('Y')?>
-
+        echo  '<br>'.$jdf->jstrftime('%c ');
+        ?>©  Sajjad eftekhari <?= date('Y')?>
   </span>
 </div>
 </body>

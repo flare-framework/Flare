@@ -1,11 +1,8 @@
 <?php
-function View($file , $data=null){
-    return require_once (CONFIG.'/../View/'.$file.'.php') ;
-}
-function View2($filePath, $variables = array(), $print = true)
+function View($filePath, $variables = array(), $print = true)
 {
     $output = NULL;
-    $filePath= CONFIG.'/../View/'.$filePath.'.php' ;
+    $filePath= CONFIG.'../View/'.$filePath.'.php' ;
     if(file_exists($filePath)){
         extract($variables);
         ob_start();
@@ -17,6 +14,9 @@ function View2($filePath, $variables = array(), $print = true)
     }
     return $output;
 }
+function View2($file , $data=null){
+    return require_once (CONFIG.'../View/'.$file.'.php') ;
+}
 function redirect($url='') {
     $url=$_ENV['URL'].$url ;
     header("location: " . $url);
@@ -24,7 +24,6 @@ function redirect($url='') {
 }
 function autoLoader ($class ) {
     $dir='/../Flare_Libraries/';
-    // don't use namespace in Flare_Libraries !!!!!!!
     if (file_exists(__DIR__.$dir.$class.'.php')) {
         $parts = explode('\\', $class);
         require_once __DIR__.$dir.$class.'.php';
@@ -32,6 +31,15 @@ function autoLoader ($class ) {
 }
 function lautoLoader ($class ) {
     $dir='/../Libraries/';
+    $classNameParts = explode('\\', $class);
+    $class = end($classNameParts);
+    if (file_exists(__DIR__.$dir.$class.'.php')) {
+        $parts = explode('\\', $class);
+        require_once __DIR__.$dir.$class.'.php';
+    }
+}
+function CautoLoader ($class ) {
+    $dir='/../Controllers/';
     $classNameParts = explode('\\', $class);
     $class = end($classNameParts);
     if (file_exists(__DIR__.$dir.$class.'.php')) {

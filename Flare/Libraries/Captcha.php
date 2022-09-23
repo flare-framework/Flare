@@ -15,7 +15,7 @@ class Captcha {
     // (B) DRAW THE CAPTCHA IMAGE
 //$font=base_url('arial.ttf');
  //   function draw ($output=1, $width=300, $height=100, $fontsize=24, $font="C:\Windows\Fonts\orial.ttf") {
-    function draw ($output=1, $width=300, $height=100, $fontsize=24, $font='./addiel.ttf') {
+    function draw ($output=1, $width=300, $height=100, $fontsize=24, $font=PUPATH.'Orial.ttf') {
         // (B1) OOPS
        // base_url()
         if (!isset($_SESSION['captcha'])) { throw new Exception("CAPTCHA NOT PRIMED"); }

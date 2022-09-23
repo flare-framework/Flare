@@ -16,13 +16,12 @@
     "require": {
         "php": ">=8.0",
         "vlucas/phpdotenv": "^5.3",
-        "izniburak/router": "^2.3",
         "respect/validation": "^2.2",
         "odan/session": "^5.1",
-        "league/plates": "^3.4",
         "phpmailer/phpmailer": "^6.5",
         "verot/class.upload.php": "^2.1",
-        "tracy/tracy": "3.0.x-dev"
+        "bramus/router": "~1.6",
+        "symfony/error-handler": "6.2.x-dev"
     },
     "repositories": [
         {
@@ -30,6 +29,4 @@
             "url": "https://github.com/flare-framework/Flare"
         }
     ]
-
-
 }

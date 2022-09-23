@@ -1,27 +1,18 @@
 <?php
-use Buki\Router\Router;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-$router = new \Buki\Router\Router([
-    'paths' => [
-        'controllers' => CONFIG.'../Controllers',
-        'middlewares' => CONFIG.'../Middlewares',
-    ],
-    'namespaces' => [
-        'controllers' => 'Controllers',
-        'middlewares' => 'Middlewares',
-    ],
-]);
-// https://github.com/izniburak/php-router/wiki/5.-Controllers
-$router->get('/hi',function (){
-    View2('Welcome/Welcome');
+
+$router = new Bramus\Router\Router() ;
+$router->setNamespace('Controllers');
+$router->get('/','BaseController@index');
+$router->get('/home','BaseController@alldata');
+$router->post('/ajax','BaseController@alldata2');
+
+
+$router->get('/about', function() {
+    echo 'Powerful like the king';
 });
-$router->get('/', 'EFTEKHARI@index');
-$router->get('/create', 'EFTEKHARI@create');
-$router->post('/store', 'EFTEKHARI@store');
-$router->put('/update/:id', 'EFTEKHARI@update');
-$router->delete('/delete/:id', 'EFTEKHARI@delete');
-$router->error(function() {
-    View('404/404') ;
+
+$router->set404(function() {
+   return View2('404/404') ;
 });
+
 $router->run();
