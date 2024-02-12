@@ -1,5 +1,5 @@
 # Flare Framework 4.2.0
-Developer by Sajjad Eftekhari![](https://manbaenab.ir/uploads/Flare.png)
+Developed by Sajjad Eftekhari![](https://manbaenab.ir/uploads/Flare.png)
 ## What is Flare?
 
 Flare is a PHP full-stack web framework that is light, fast, flexible, and secure. 
