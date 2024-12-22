@@ -14,8 +14,8 @@ PHP version 8 or higher is required, with the following extensions installed:
 ### you can use composer or download from https://github.com/flare-framework/Flare/releases
 ### composer create-project flare-framework/flare mysite
 # Flare built with a number of powerful and fast packages with other important features 
-### for env https://github.com/vlucas/phpdotenv
- ### for  Router and Middlewares. use https://github.com/bramus/router
+### for Template system  https://latte.nette.org/en/tags
+### for  Router and Middlewares. use https://github.com/bramus/router
 ### for $db and Model 
 ###  https://github.com/ThingEngineer/PHP-MySQLi-Database-Class
 ### https://github.com/ThingEngineer/PHP-MySQLi-Database-Class/blob/master/dbObject.md
