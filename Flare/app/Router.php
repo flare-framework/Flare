@@ -2,18 +2,26 @@
 use Bramus\Router\Router;
 $router = new Router() ;
 $router->setNamespace('Controllers');
+
 //  Middlewares
 
 $router->before('GET|POST', '/about', function() {
   \Middlewares\AdminFilter::filter();
 });
+$router->before('GET|POST', '/debug', function() {
+    \Middlewares\AdminFilter::spaFalse();
+
+});
 //Controllers
 
-$router->get('/','Home@index');
-$router->get('/latte','Home@lattev');
-$router->get('/ajax','Home@alldata');
-$router->post('/ajax','Home@alldata2' );
-$router->get('/debug','Home@debugbar' );
+$router->get('/','Welcome@index');
+$router->get('/flare','Welcome@lattev');
+$router->get('/home','Welcome@Home');
+
+$router->get('/hi', function() {
+    echo '<h1>hi king !<h1>';
+});
+
 $router->get('/about', function() {
     echo 'Powerful like the king !';
 });

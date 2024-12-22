@@ -4,45 +4,50 @@ use Odan\Session\PhpSession;
 use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\DebugClassLoader;
 use DebugBar\StandardDebugBar;
-$DotenvDir=((php_sapi_name() == "cli")?'../../':'../');
-$dotenv = Dotenv\Dotenv::createImmutable( $DotenvDir);unset($DotenvDir);
-$dotenv->safeLoad();
 ini_set('memory_limit', '2G');
 ini_set('max_execution_time', '600');
 date_default_timezone_set('Asia/Tehran');
 $session = new PhpSession();
 require_once (CONFIG.'/../Global_Functions/Flare.php') ;
-if (isset($_ENV['Dev_set'])) {
-    if (isset($_ENV['URL'])){
-        define("URL", $_ENV['URL']);
+$CONF_SPA=true;
+$Deb_set=false;
+$Config=[
+    'URL'      => 'http://localhost/myapp/public' ,
+    'DB_HOST'  => 'localhost',
+    'DB_NAME'  => 'Flare_Db',
+    'DB_USER'  => 'root',
+    'DB_PASS'  => '',
+    'DB_PREFIX'=>'',
+    'DB_PORT'  =>3306,
+];
+    if (isset($Config['URL'])){
+        $Config['URL'] = (substr($Config['URL'], -2) === '//') ? substr($Config['URL'], 0, -1) : rtrim($Config['URL'], '/') . '/';
+        define("URL", $Config['URL']);
         }else{
         define("URL", url());
     }
-    if ($_ENV['Dev_set']==='on'){
-        $Dev_set=$_ENV['Dev_set'] ;
+    if ($Deb_set==true){
         Debug::enable();
         DebugClassLoader::enable();
         ob_start();
         $debugbar = new StandardDebugBar();
        // $debugbarResources = PUPATH.'../vendor/maximebf/debugbar/src/DebugBar/Resources';
-      //  mega_copy($debugbarResources, PUPATH.'DebugBar');
+       // mega_copy($debugbarResources, PUPATH.'DebugBar');
         $debugbarRenderer = $debugbar->getJavascriptRenderer(URL.'/DebugBar');
     }else{
-        $Dev_set=false ;
+        $Deb_set=false ;
     }
-}
-//spl_autoload_register('autoLoader');
 spl_autoload_register('CautoLoader');
-if (isset($_ENV['db'])){
+if (isset($Config['DB_NAME'])){
     $db= new MysqliDb(Array (
-        'host' => $_ENV['DB_HOST'],
-        'username' => $_ENV['DB_USER'],
-        'password' => $_ENV['DB_PASS'],
-        'db'=> $_ENV['DB_NAME'],
-        'port' =>((isset( $_ENV['DB_PORT']))? $_ENV['DB_PORT']:3306)  ,
-        'prefix' => ((isset( $_ENV['DB_PREFIX']))? $_ENV['DB_PREFIX']:'')  ,
+        'host' => $Config['DB_HOST'],
+        'username' => $Config['DB_USER'],
+        'password' => $Config['DB_PASS'],
+        'db'=> $Config['DB_NAME'],
+        'port' =>((isset( $Config['DB_PORT']))? $Config['DB_PORT']:3306)  ,
+        'prefix' => ((isset( $Config['DB_PREFIX']))? $Config['DB_PREFIX']:'')  ,
         'charset' => 'utf8'));
-    unset($_ENV,$dotenv) ;
+    unset($Config) ;
 }
 dbObject::autoload(CONFIG."/../Models");
 

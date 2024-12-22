@@ -1,6 +1,5 @@
 <?php
-function View($filePath, $variables = array(), $print = false)
-{
+function View($filePath, $variables = array(), $print = false){
     $output = NULL;
     $filePath= CONFIG.'../View/'.$filePath.'.php' ;
     if(file_exists($filePath)){
@@ -18,29 +17,26 @@ function View2($file , $data=null){
     if (!empty($data)){
         extract($data);
     }
-     require_once (CONFIG.'../View/'.$file.'.php') ;
+    require_once (CONFIG.'../View/'.$file.'.php') ;
 }
 function redirect($url='') {
     $url=$_ENV['URL'].$url ;
     header("location: " . $url);
-   return exit();
+    return exit();
 }
 function CautoLoader ($class) {
     $dirs=['Flare_Libraries','Libraries','Controllers','Middlewares'];
-        foreach ($dirs as $dir){
-            $dir="/../$dir/";
-           // de($class).'<br>';
-            $classNameParts = explode('\\', $class);
-            $class = end($classNameParts);
-            if (file_exists(__DIR__.$dir.$class.'.php')) {
-                $parts = explode('\\', $class);
-                require_once __DIR__.$dir.$class.'.php';
-              //  echo $dir.'<br>'.count($dirs);
-            }
+    foreach ($dirs as $dir){
+        $dir="/../$dir/";
+        $classNameParts = explode('\\', $class);
+        $class = end($classNameParts);
+        if (file_exists(__DIR__.$dir.$class.'.php')) {
+            $parts = explode('\\', $class);
+            require_once __DIR__.$dir.$class.'.php';
         }
+    }
 }
-function url($string='',$x=false):string
-{
+function url($string='',$x=false):string{
     $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     if ($x) {return substr($url, 0, strpos($url, "?").$string);}
     return $url.$string;
@@ -61,4 +57,7 @@ function mega_copy($source, $destination) {
             }
         }
     }
+}
+function spa(){
+    return '<script type="text/javascript" n:syntax="double" src="'.URL.'FlareFunctions.js"></script>' ;
 }

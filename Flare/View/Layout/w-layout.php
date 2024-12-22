@@ -12,6 +12,7 @@
             background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
             overflow: hidden;
         }
+
         #stars {
             width: 1px;
             height: 1px;
@@ -62,6 +63,7 @@
             background: transparent;
             box-shadow: 331px 1122px #FFF , 1983px 84px #FFF , 1626px 582px #FFF , 520px 1560px #FFF , 976px 1292px #FFF , 810px 907px #FFF , 1044px 1350px #FFF , 625px 685px #FFF , 53px 416px #FFF , 546px 849px #FFF , 1093px 873px #FFF , 1885px 1951px #FFF , 1156px 262px #FFF , 733px 97px #FFF , 641px 1819px #FFF , 1530px 367px #FFF , 819px 1124px #FFF , 540px 550px #FFF , 823px 850px #FFF , 1636px 800px #FFF , 1387px 563px #FFF , 379px 1449px #FFF , 1308px 1233px #FFF , 295px 1512px #FFF , 102px 1957px #FFF , 1113px 1788px #FFF , 1180px 454px #FFF , 21px 146px #FFF , 580px 1676px #FFF , 899px 1461px #FFF , 1398px 42px #FFF , 182px 209px #FFF , 1266px 1562px #FFF , 1939px 451px #FFF , 1703px 50px #FFF , 144px 315px #FFF , 455px 121px #FFF , 751px 1823px #FFF , 297px 1258px #FFF , 1674px 475px #FFF , 1885px 1241px #FFF , 160px 125px #FFF , 262px 322px #FFF , 1107px 911px #FFF , 1217px 145px #FFF , 1387px 1028px #FFF , 646px 1681px #FFF , 1969px 1417px #FFF , 1754px 890px #FFF , 1339px 412px #FFF , 1062px 585px #FFF , 365px 225px #FFF , 1388px 1845px #FFF , 383px 250px #FFF , 1057px 457px #FFF , 1153px 1978px #FFF , 1689px 1084px #FFF , 1855px 1630px #FFF , 1250px 425px #FFF , 1033px 1638px #FFF , 1684px 253px #FFF , 58px 1901px #FFF , 1281px 856px #FFF , 518px 1893px #FFF , 1250px 835px #FFF , 862px 1834px #FFF , 63px 1978px #FFF , 1981px 226px #FFF , 825px 883px #FFF , 723px 196px #FFF , 997px 106px #FFF , 1317px 1553px #FFF , 1879px 835px #FFF , 1830px 1046px #FFF , 872px 98px #FFF , 1722px 78px #FFF , 886px 486px #FFF , 1752px 646px #FFF , 74px 1594px #FFF , 251px 183px #FFF , 1767px 1373px #FFF , 1504px 489px #FFF , 339px 693px #FFF , 1437px 1169px #FFF , 1312px 995px #FFF , 1669px 928px #FFF , 346px 935px #FFF , 1921px 1826px #FFF , 1429px 776px #FFF , 458px 899px #FFF , 1880px 945px #FFF , 319px 1204px #FFF , 366px 164px #FFF , 1512px 1817px #FFF , 852px 1330px #FFF , 10px 34px #FFF , 16px 1171px #FFF , 1373px 74px #FFF , 1042px 1448px #FFF , 1955px 742px #FFF;
         }
+
         #title {
             position: absolute;
             top: 25%;
@@ -81,6 +83,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
         @keyframes animStar {
             from {
                 transform: translateY(0px);
@@ -90,13 +93,12 @@
             }
         }
         ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #333;
+         list-style-type: none;
+         margin: 0;
+         padding: 0;
+         overflow: hidden;
+         background-color: #333;
         }
-
         li {
             float: left;
         }
@@ -108,19 +110,33 @@
             text-decoration: none;
         }
         li a:hover {
-            background-color: #111;
+            background-color: #2ab5ff;
+        }
+        li button {
+            display: block;
+            color: white;
+            background-color: #FFFFFF00;
+            text-align: center;
+            padding: 14px 16px;
+            border: 0px;
+            text-decoration: none;
+        }
+        li button:hover {
+            background-color:  #2ab5ff;
         }
     </style>
+
 </head>
-<body><ul>
-    <li><a class="active" href="<?=str_replace('debug','',url())?>">Home</a></li>
-    <li><a href="<?=str_replace('debug','',url('latte'))?>">Latte</a></li>
-    <li><a href="<?=str_replace('debug','',url('ajax'))?>">Ajax</a></li>
-    <li><a href="<?=str_replace('debug','',url('about'))?>">About</a></li>
-    <li><a href="<?=str_replace('debugdebug','debug',url('debug'))?>">Debugbar</a></li>
+<body>
+<ul>
+    <li><a class="active" href="<?=URL?>">Home</a></li>
+    <li><button onclick="sendAjax('<?=URL?>')" >Latte</button></li>
+    <li><button onclick="sendAjax('<?=URL.'flare'?>')">Ajax</button></li>
+    <li><button onclick="sendAjax('<?=URL.'about'?>')" >About</button></li>
+    <li><button onclick="sendAjax('<?=URL.'debug'?>')" >Debugbar</button></li>
     <li><a href="https://www.instagram.com/phpdevelop.er" target="_blank">instagram</a></li>
     <li><a href="https://github.com/flare-framework" target="_blank">github</a></li>
 </ul>
-<?=$content?>
+<?= $content?>
 </body>
 </html>

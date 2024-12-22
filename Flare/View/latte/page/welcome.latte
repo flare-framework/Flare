@@ -1,4 +1,4 @@
-{layout '../layouts/@w-layout.latte'}
+{layout '../layouts/w-layout.latte'}
 {block title}{$title}{/block}
 {block content}
 <div id='stars'></div>
@@ -11,7 +11,7 @@
 <br>
 <span style="font-size: xx-large">
 {php
-  echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION : 4.2.0'  ;
+  echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION : 4.4.0'  ;
   $jdf = new jdf() ;
   echo  '<br>'.$jdf->jstrftime('%c');
 }©  Sajjad eftekhari {date('Y')}</span>

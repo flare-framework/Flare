@@ -23,6 +23,8 @@ final class CurrencyCode extends AbstractSearcher
      * @see http://www.currency-iso.org/en/home/tables/table-a1.html
      *
      * {@inheritDoc}
+     *
+     * @return string[]
      */
     protected function getDataSource($input = null): array
     {
@@ -156,7 +158,6 @@ final class CurrencyCode extends AbstractSearcher
             'SGD', // Singapore Dollar
             'SHP', // Saint Helena Pound
             'SLE', // Leone
-            'SLL', // Leone
             'SOS', // Somali Shilling
             'SRD', // Surinam Dollar
             'SSP', // South Sudanese Pound
@@ -206,7 +207,7 @@ final class CurrencyCode extends AbstractSearcher
             'YER', // Yemeni Rial
             'ZAR', // Rand
             'ZMW', // Zambian Kwacha
-            'ZWL', // Zimbabwe Dollar
+            'ZWG', // Zimbabwe Gold
         ];
     }
 }

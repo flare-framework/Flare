@@ -11,7 +11,7 @@ class CorenJob
      $cdm = date('i');
      $cdT = (int)$cdh*60 +(int)$cdm ;//one day = 1440
 
-     echo $day_of_week.'-----'.$cdT.PUPATH  ;
+     echo '--day of week--'.$day_of_week.'-----'.$cdT.PUPATH  ;
  }
 }
 if (php_sapi_name() == 'cli') {

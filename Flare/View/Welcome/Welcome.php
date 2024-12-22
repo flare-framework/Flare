@@ -1,3 +1,6 @@
+<?php
+//use jdf;
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +16,7 @@
             overflow: hidden;
 
         }
+
         #stars {
             width: 1px;
             height: 1px;
@@ -92,55 +96,27 @@
                 transform: translateY(-2000px);
             }
         }
-        ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #333;
-        }
-
-        li {
-            float: left;
-        }
-        li a {
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-        }
-        li a:hover {
-            background-color: #111;}
     </style>
 
 </head>
 <body>
-<ul>
-    <li><a class="active" href="<?=str_replace('debug','',url())?>">Home</a></li>
-    <li><a href="<?=str_replace('debug','',url('latte'))?>">Latte</a></li>
-    <li><a href="<?=str_replace('debug','',url('ajax'))?>">Ajax</a></li>
-    <li><a href="<?=str_replace('debug','',url('about'))?>">About</a></li>
-    <li><a href="<?=str_replace('debugdebug','debug',url('debug'))?>">Debugbar</a></li>
-    <li><a href="https://www.instagram.com/phpdevelop.er" target="_blank">instagram</a></li>
-    <li><a href="https://github.com/flare-framework" target="_blank">github</a></li>
-</ul>
 <div id='stars'></div>
 <div id='stars2'></div>
 <div id='stars3'></div>
 <div id='title'>
-    <span>Welcome to</span><br>
-    <span>Flare Framework</span><br>
-    <img src="Flare.png" alt="Flare - logo" width="20%" height="20%">
-    <br>
-    <span style="font-size: xx-large">
-<?php
-echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION : 4.2.0'  ;
-$jdf = new jdf() ;
-echo  '<br>'.$jdf->jstrftime('%c');
-?>
-©  Sajjad eftekhari <?= date('Y')?></span>
+    <span >
+       Welcome to
+  </span> <br>
+    <span>
+   Flare Framework<br>
+        <img src="Flare.png" alt="honorary- logo" width="20%" height="20%">
+    <span   style="font-size: xx-large">
+        <?php
+        echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION : 4.4.0'  ;
+        $jdf = new jdf() ;
+        echo  '<br>'.$jdf->jstrftime('%c ');
+        ?>©  Sajjad eftekhari <?= date('Y')?>
+  </span>
 </div>
 </body>
 </html>
-

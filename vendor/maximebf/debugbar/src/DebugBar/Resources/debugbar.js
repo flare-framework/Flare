@@ -186,7 +186,7 @@ if (typeof(PhpDebugBar) == 'undefined') {
          * @param {Function} cb
          */
         bindAttr: function(attr, cb) {
-            if ($.isArray(attr)) {
+            if (Array.isArray(attr)) {
                 for (var i = 0, c = attr.length; i < c; i++) {
                     this.bindAttr(attr[i], cb);
                 }
@@ -256,7 +256,6 @@ if (typeof(PhpDebugBar) == 'undefined') {
 
         render: function() {
             this.$tab = $('<a />').addClass(csscls('tab'));
-
             this.$icon = $('<i />').appendTo(this.$tab);
             this.bindAttr('icon', function(icon) {
                 if (icon) {
@@ -285,6 +284,9 @@ if (typeof(PhpDebugBar) == 'undefined') {
             this.bindAttr('data', function(data) {
                 if (this.has('widget')) {
                     this.get('widget').set('data', data);
+                    if (!$.isEmptyObject(data)) {
+                        this.$tab.show();
+                    }
                 }
             })
         }
@@ -326,7 +328,16 @@ if (typeof(PhpDebugBar) == 'undefined') {
             this.$tooltip = $('<span />').addClass(csscls('tooltip disabled')).appendTo(this.$el);
             this.bindAttr('tooltip', function(tooltip) {
                 if (tooltip) {
-                    this.$tooltip.text(tooltip).removeClass(csscls('disabled'));
+                    var dl = $('<dl />');
+                    if (Array.isArray(tooltip) || typeof tooltip === 'object') {
+                        $.each(tooltip, function(key, value) {
+                            $('<dt />').text(key).appendTo(dl);
+                            $('<dd />').text(value).appendTo(dl);
+                        });
+                        this.$tooltip.html(dl).removeClass(csscls('disabled'));
+                    } else {
+                        this.$tooltip.text(tooltip).removeClass(csscls('disabled'));
+                    }
                 } else {
                     this.$tooltip.addClass(csscls('disabled'));
                 }
@@ -357,27 +368,29 @@ if (typeof(PhpDebugBar) == 'undefined') {
          * @param {String} suffix
          * @return {String}
          */
-        format: function(id, data, suffix) {
+        format: function(id, data, suffix, nb) {
             if (suffix) {
                 suffix = ' ' + suffix;
             } else {
                 suffix = '';
             }
 
-            var nb = getObjectSize(this.debugbar.datasets) + 1;
+            var nb = nb || getObjectSize(this.debugbar.datasets) ;
 
             if (typeof(data['__meta']) === 'undefined') {
                 return "#" + nb + suffix;
             }
 
-            var uri = data['__meta']['uri'], filename;
-            if (uri.length && uri.charAt(uri.length - 1) === '/') {
-                // URI ends in a trailing /: get the portion before then to avoid returning an empty string
-                filename = uri.substr(0, uri.length - 1); // strip trailing '/'
-                filename = filename.substr(filename.lastIndexOf('/') + 1); // get last path segment
-                filename += '/'; // add the trailing '/' back
-            } else {
-                filename = uri.substr(uri.lastIndexOf('/') + 1);
+            var uri = data['__meta']['uri'].split('/'), filename = uri.pop();
+
+            // URI ends in a trailing /, avoid returning an empty string
+            if (!filename) {
+                filename = (uri.pop() || '') + '/'; // add the trailing '/' back
+            }
+
+            // filename is a number, path could be like /action/{id}
+            if (uri.length && !isNaN(filename)) {
+                filename = uri.pop() + '/' + filename;
             }
 
             // truncate the filename in the label, if it's too long
@@ -420,8 +433,17 @@ if (typeof(PhpDebugBar) == 'undefined') {
             this.datasets = {};
             this.firstTabName = null;
             this.activePanelName = null;
+            this.activeDatasetId = null;
+            this.hideEmptyTabs = false;
+            this.restorePosition = localStorage.getItem('phpdebugbar-restore-position');
+            this.restoreOffset = localStorage.getItem('phpdebugbar-restore-offset') || 0;
             this.datesetTitleFormater = new DatasetTitleFormater(this);
             this.options.bodyMarginBottomHeight = parseInt($('body').css('margin-bottom'));
+            try {
+                this.isIframe = window.self !== window.top && window.top.phpdebugbar;
+            } catch (error) {
+                this.isIframe = false;
+            }
             this.registerResizeHandler();
         },
 
@@ -431,7 +453,7 @@ if (typeof(PhpDebugBar) == 'undefined') {
          * @this {DebugBar}
          */
         registerResizeHandler: function() {
-            if (typeof this.resize.bind == 'undefined') return;
+            if (typeof this.resize.bind == 'undefined' || this.isIframe) return;
 
             var f = this.resize.bind(this);
             this.respCSSSize = 0;
@@ -445,13 +467,13 @@ if (typeof(PhpDebugBar) == 'undefined') {
         resize: function() {
             var contentSize = this.respCSSSize;
             if (this.respCSSSize == 0) {
-                this.$header.find("> div > *:visible").each(function () {
-                    contentSize += $(this).outerWidth();
+                this.$header.find("> *:visible").each(function () {
+                    contentSize += $(this).outerWidth(true);
                 });
             }
 
             var currentSize = this.$header.width();
-            var cssClass = "phpdebugbar-mini-design";
+            var cssClass = csscls("mini-design");
             var bool = this.$header.hasClass(cssClass);
 
             if (currentSize <= contentSize && !bool) {
@@ -464,6 +486,9 @@ if (typeof(PhpDebugBar) == 'undefined') {
 
             // Reset height to ensure bar is still visible
             this.setHeight(this.$body.height());
+            if (this.restorePosition) {
+                this.resizeRestoreButton();
+            }
         },
 
         /**
@@ -472,6 +497,10 @@ if (typeof(PhpDebugBar) == 'undefined') {
          * @this {DebugBar}
          */
         render: function() {
+            if (this.isIframe) {
+                this.$el.hide();
+            }
+
             var self = this;
             this.$el.appendTo('body');
             this.$dragCapture = $('<div />').addClass(csscls('drag-capture')).appendTo(this.$el);
@@ -527,6 +556,12 @@ if (typeof(PhpDebugBar) == 'undefined') {
                 self.restore();
             });
 
+            // dragging of restore button
+            this.$restorebtn.on('mousedown touchstart', function (e) {
+                self.draggingRestoreButtonEvent(e);
+                e.preventDefault();
+            });
+
             // open button
             this.$openbtn = $('<a />').addClass(csscls('open-btn')).appendTo(this.$headerRight).hide();
             this.$openbtn.click(function() {
@@ -537,10 +572,10 @@ if (typeof(PhpDebugBar) == 'undefined') {
             });
 
             // select box for data sets
-            this.$datasets = $('<select />').addClass(csscls('datasets-switcher')).appendTo(this.$headerRight);
+            this.$datasets = $('<select />').addClass(csscls('datasets-switcher')).attr('name', 'datasets-switcher')
+                .appendTo(this.$headerRight);
             this.$datasets.change(function() {
-                self.dataChangeHandler(self.datasets[this.value]);
-                self.showTab();
+                self.showDataSet(this.value);
             });
         },
 
@@ -570,6 +605,7 @@ if (typeof(PhpDebugBar) == 'undefined') {
          * @this {DebugBar}
          */
         restoreState: function() {
+            if (this.isIframe) return;
             // bar height
             var height = localStorage.getItem('phpdebugbar-height');
             this.setHeight(height || this.$body.height());
@@ -584,6 +620,8 @@ if (typeof(PhpDebugBar) == 'undefined') {
                     var tab = localStorage.getItem('phpdebugbar-tab');
                     if (this.isTab(tab)) {
                         this.showTab(tab);
+                    } else {
+                        this.showTab();
                     }
                 }
             }
@@ -626,7 +664,12 @@ if (typeof(PhpDebugBar) == 'undefined') {
                 } else {
                     self.showTab(name);
                 }
-            });
+            })
+            if (this.hideEmptyTabs) {
+                tab.$tab.hide();
+            }
+            tab.$tab.attr('data-collector', name);
+            tab.$el.attr('data-collector', name);
             tab.$el.appendTo(this.$body);
 
             this.controls[name] = tab;
@@ -642,7 +685,7 @@ if (typeof(PhpDebugBar) == 'undefined') {
          * @this {DebugBar}
          * @param {String} name Internal name
          * @param {String} icon
-         * @param {String} tooltip
+         * @param {String|Object} tooltip
          * @param {String} position "right" or "left", default is "right"
          * @return {Indicator}
          */
@@ -772,6 +815,7 @@ if (typeof(PhpDebugBar) == 'undefined') {
             this.$el.removeClass(csscls('minimized'));
             localStorage.setItem('phpdebugbar-visible', '1');
             localStorage.setItem('phpdebugbar-tab', name);
+
             this.resize();
         },
 
@@ -811,6 +855,9 @@ if (typeof(PhpDebugBar) == 'undefined') {
             this.$restorebtn.show();
             localStorage.setItem('phpdebugbar-open', '0');
             this.$el.addClass(csscls('closed'));
+            if (this.restorePosition) {
+                this.resizeRestoreButton();
+            }
             this.recomputeBottomOffset();
         },
 
@@ -829,6 +876,10 @@ if (typeof(PhpDebugBar) == 'undefined') {
          * @this {DebugBar}
          */
         restore: function() {
+            if (this.$el.hasClass(csscls('dragging'))){
+                this.$el.removeClass(csscls('dragging'));
+                return;
+            }
             this.$resizehdle.show();
             this.$header.show();
             this.$restorebtn.hide();
@@ -840,6 +891,7 @@ if (typeof(PhpDebugBar) == 'undefined') {
                 this.showTab();
             }
             this.$el.removeClass(csscls('closed'));
+            this.$el.css('left', '');
             this.resize();
         },
 
@@ -855,6 +907,155 @@ if (typeof(PhpDebugBar) == 'undefined') {
 
                 var offset = parseInt(this.$el.height()) + (this.options.bodyMarginBottomHeight || 0);
                 $('body').css('margin-bottom', offset);
+            }
+        },
+
+        /**
+         * allows you to move the revert button so that other components of the page can be displayed
+         */
+        draggingRestoreButtonEvent: function(e) {
+            var self = this;
+            if (!self.isClosed()) return;
+
+            // Track initial mouse position and element position
+            var initialMouseX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+            var initialPosX = self.$el.position().left;
+            var moved = false;
+            var target = e.target;
+
+
+            function doDrag(e) {
+                // Calculate the change in mouse position
+                var clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+                var deltaX = clientX - initialMouseX;
+
+                // When not changed, don't
+                if (deltaX !== 0) {
+                    moved = true;
+                }
+
+                // Update the position of the element
+                var newPosX = initialPosX + deltaX;
+
+                // Ensure the new position is within screen boundaries
+                newPosX = self.recomputeRestorePositionX(newPosX);
+
+                self.$el.css('left', newPosX + 'px');
+                self.$el.css('right', 'auto');
+                self.$el.addClass(csscls('dragging'));
+            }
+
+            function stopDragging() {
+                // Unbind the move and up/end events
+                $(document).off('mousemove.drag touchmove.drag', doDrag);
+                $(document).off('mouseup.drag touchend.drag', stopDragging);
+
+                // Check if this was actually a drag instead of a click
+                if (!moved) {
+                    $(target).trigger('click');
+                    return;
+                }
+
+                // Save the new position as a percentage of screen width
+                var finalPosX = self.$el.position().left;
+                var screenWidth = $(window).width();
+
+                var positionPercentage = (finalPosX / screenWidth) * 100; // Store as percentage
+
+                if (positionPercentage < 10) {
+                    self.restorePosition = 'bottomLeft';
+                    self.restoreOffset = finalPosX;
+                } else if (positionPercentage > 90) {
+                    self.restorePosition = 'bottomRight';
+                    self.restoreOffset = screenWidth - finalPosX;
+                } else {
+                    self.restorePosition = 'bottomPercentage';
+                    self.restoreOffset = positionPercentage;
+                }
+
+                localStorage.setItem('phpdebugbar-restore-position',  self.restorePosition);
+                localStorage.setItem('phpdebugbar-restore-offset', self.restoreOffset);
+
+                setTimeout(function () {
+                    self.resizeRestoreButton();
+                    self.$el.removeClass(csscls('dragging'));
+                }, 500);
+            }
+
+            // Bind the move and up/end events
+            $(document).on('mousemove.drag touchmove.drag', doDrag);
+            $(document).on('mouseup.drag touchend.drag', stopDragging);
+        },
+
+        /**
+         * Recomputes the left css property of the restore btn for dragging
+         * restore button always has to be visible and not be left off the screen
+         */
+        recomputeRestorePositionX: function (posX) {
+            if (!this.isClosed()) return;
+
+            var screenWidth = $(window).width();
+            var elementWidth = this.$restorebtn.outerWidth();
+
+            // adjust position to ensure it doesn't go out of bounds
+            if (posX < 0) {
+                posX = 0;
+            } else if (posX + elementWidth > screenWidth) {
+                posX = screenWidth - elementWidth; // ensure it doesn't overflow
+            }
+
+            return posX;
+        },
+
+        /**
+         * Adjust the restore button's position when the window is resized
+         */
+        resizeRestoreButton: function() {
+            if (!this.isClosed()) return;
+            
+            var self = this;
+
+            // Get the saved position and offset/percentage
+            var position = this.restorePosition;
+            var positionOffset = parseFloat(this.restoreOffset);
+
+            if (isNaN(positionOffset) || !position){
+                return;
+            }
+
+            // Recalculate the position based on the new screen width
+            var screenWidth = $(window).width();
+
+            var elementWidth = this.$restorebtn.outerWidth();
+
+            var newPosX = positionOffset;
+            if (position === 'bottomPercentage') {
+                // Calculate the new position in pixels
+                newPosX = (positionOffset / 100) * screenWidth;
+
+            } else if (position === 'bottomRight') {
+                newPosX = newPosX - elementWidth
+            }
+
+            // Ensure the new position is within screen boundaries
+            newPosX = Math.max(0, Math.min(newPosX, screenWidth - elementWidth));
+
+            if (position === 'bottomRight') {
+                // Set the offset
+                self.$el.css('left', 'auto');
+                self.$el.css('right', newPosX + 'px');
+
+                // Apply the calculated borders to the restore button
+                this.$restorebtn.css('border-left', '1px solid #ddd');
+                this.$restorebtn.css('border-right', newPosX > 0 ? '1px solid #ddd' : '1px solid transparent');
+            } else {
+                // Set the offset
+                self.$el.css('left', newPosX + 'px');
+                self.$el.css('right', 'auto');
+
+                // Restore the borders
+                this.$restorebtn.css('border-right', '1px solid #ddd');
+                this.$restorebtn.css('border-left', newPosX > 0 ? '1px solid #ddd' : '1px solid transparent');
             }
         },
 
@@ -920,9 +1121,26 @@ if (typeof(PhpDebugBar) == 'undefined') {
          * @return {String} Dataset's id
          */
         addDataSet: function(data, id, suffix, show) {
-            var label = this.datesetTitleFormater.format(id, data, suffix);
-            id = id || (getObjectSize(this.datasets) + 1);
+            if (!data || !data.__meta) return;
+            if (this.isIframe) {
+                window.top.phpdebugbar.addDataSet(data, id, '(iframe)' + (suffix || ''), show);
+                return;
+            }
+
+            var nb = getObjectSize(this.datasets) + 1;
+            id = id || nb;
+            data.__meta['nb'] = nb;
+            data.__meta['suffix'] = suffix;
             this.datasets[id] = data;
+
+            var label = this.datesetTitleFormater.format(id, this.datasets[id], suffix, nb);
+
+            if (this.datasetTab) {
+                this.datasetTab.set('data', this.datasets);
+                var datasetSize = getObjectSize(this.datasets);
+                this.datasetTab.set('badge', datasetSize > 1 ? datasetSize : null);
+                this.datasetTab.$tab.show();
+            }
 
             this.$datasets.append($('<option value="' + id + '">' + label + '</option>'));
             if (this.$datasets.children().length > 1) {
@@ -932,6 +1150,9 @@ if (typeof(PhpDebugBar) == 'undefined') {
             if (typeof(show) == 'undefined' || show) {
                 this.showDataSet(id);
             }
+
+            this.resize();
+
             return id;
         },
 
@@ -971,8 +1192,16 @@ if (typeof(PhpDebugBar) == 'undefined') {
          * @param {String} id
          */
         showDataSet: function(id) {
+            this.activeDatasetId = id;
             this.dataChangeHandler(this.datasets[id]);
-            this.$datasets.val(id);
+
+            if (this.$datasets.val() !== id) {
+                this.$datasets.val(id);
+            }
+
+            if (this.datasetTab) {
+                this.datasetTab.get('widget').set('id', id);
+            }
         },
 
         /**
@@ -992,6 +1221,7 @@ if (typeof(PhpDebugBar) == 'undefined') {
                     self.getControl(key).set('data', d);
                 }
             });
+            self.resize();
         },
 
         /**
@@ -1009,6 +1239,10 @@ if (typeof(PhpDebugBar) == 'undefined') {
             }
         },
 
+        setHideEmptyTabs: function(hideEmpty) {
+            this.hideEmptyTabs = hideEmpty;
+        },
+
         /**
          * Returns the handler to open past dataset
          *
@@ -1017,7 +1251,26 @@ if (typeof(PhpDebugBar) == 'undefined') {
          */
         getOpenHandler: function() {
             return this.openHandler;
-        }
+        },
+
+        enableAjaxHandlerTab: function() {
+            this.datasetTab = new PhpDebugBar.DebugBar.Tab({"icon":"history", "title":"Request history", "widget": new PhpDebugBar.Widgets.DatasetWidget({
+                    'debugbar': this
+                })});
+            this.datasetTab.$tab.addClass(csscls('tab-history'));
+            this.datasetTab.$tab.attr('data-collector', '__datasets');
+            this.datasetTab.$el.attr('data-collector', '__datasets');
+            this.datasetTab.$tab.insertAfter(this.$openbtn).hide();
+            this.datasetTab.$tab.click(() => {
+                if (!this.isMinimized() && self.activePanelName == '__datasets') {
+                    this.minimize();
+                } else {
+                    this.showTab('__datasets');
+                }
+            });
+            this.datasetTab.$el.appendTo(this.$body);
+            this.controls['__datasets'] = this.datasetTab;
+        },
 
     });
 
@@ -1037,6 +1290,9 @@ if (typeof(PhpDebugBar) == 'undefined') {
         this.debugbar = debugbar;
         this.headerName = headerName || 'phpdebugbar';
         this.autoShow = typeof(autoShow) == 'undefined' ? true : autoShow;
+        if (localStorage.getItem('phpdebugbar-ajaxhandler-autoshow') !== null) {
+            this.autoShow = localStorage.getItem('phpdebugbar-ajaxhandler-autoshow') == '1';
+        }
     };
 
     $.extend(AjaxHandler.prototype, {
@@ -1075,6 +1331,11 @@ if (typeof(PhpDebugBar) == 'undefined') {
 
         isXHR: function(response) {
             return Object.prototype.toString.call(response) == '[object XMLHttpRequest]'
+        },
+
+        setAutoShow: function(autoshow) {
+            this.autoShow = autoshow;
+            localStorage.setItem('phpdebugbar-ajaxhandler-autoshow', autoshow ? '1' : '0');
         },
 
         /**
@@ -1174,6 +1435,9 @@ if (typeof(PhpDebugBar) == 'undefined') {
 
                 promise.then(function (response) {
                     self.handle(response);
+                }).catch(function(reason) {
+                    // Fetch request failed or aborted via AbortController.abort().
+                    // Catch is required to not trigger React's error handler.
                 });
 
                 return promise;
@@ -1181,10 +1445,7 @@ if (typeof(PhpDebugBar) == 'undefined') {
         },
 
         /**
-         * Attaches an event listener to jQuery.ajaxComplete()
-         *
-         * @this {AjaxHandler}
-         * @param {jQuery} jq Optional
+         * @deprecated use bindToXHR instead
          */
         bindToJquery: function(jq) {
             var self = this;
@@ -1208,7 +1469,7 @@ if (typeof(PhpDebugBar) == 'undefined') {
                 this.addEventListener("readystatechange", function() {
                     var skipUrl = self.debugbar.openHandler ? self.debugbar.openHandler.get('url') : null;
                     var href = (typeof url === 'string') ? url : url.href;
-                    
+
                     if (xhr.readyState == 4 && href.indexOf(skipUrl) !== 0) {
                         self.handle(xhr);
                     }

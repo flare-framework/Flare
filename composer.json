@@ -15,7 +15,6 @@
     ],
     "require": {
         "php": ">=8.0",
-        "vlucas/phpdotenv": "^5.3",
         "respect/validation": "^2.2",
         "odan/session": "^5.1",
         "phpmailer/phpmailer": "^6.5",
