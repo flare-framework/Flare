@@ -1,24 +1,3 @@
-// function sendAjax(page, containerId = 'main-content') {
-//         var xhttp;
-//         if (window.XMLHttpRequest) {
-//             xhttp = new XMLHttpRequest();
-//         } else {
-//             xhttp = new ActiveXObject("Microsoft.XMLHTTP");
-//         }
-//         xhttp.onreadystatechange = function() {
-//             if (this.status === 200) {
-//                 document.documentElement.innerHTML = '';
-//                 window.history.pushState("object or string", "a", page);
-//                 document.documentElement.innerHTML = this.responseText;
-//             }
-//         };
-//         xhttp.open("GET", page, true);
-//         xhttp.send();
-//     }
-//
-
-
-
 function sendAjax(page, containerId) {
     var xhttp;
     if (window.XMLHttpRequest) {
@@ -65,18 +44,4 @@ function sendAjax(page, containerId) {
     xhttp.open("GET", page, true);
     xhttp.send();
 }
-
-
-    // var xhttp;
-    // xhttp = new XMLHttpRequest();
-    // xhttp.onreadystatechange = function() {
-    //     if (this.status === 200) {
-    //         document.documentElement.innerHTML = '';
-    //         window.history.pushState("object or string", "a", page);
-    //         document.documentElement.innerHTML = this.responseText;
-    //     }
-    // };
-    //
-
-
 

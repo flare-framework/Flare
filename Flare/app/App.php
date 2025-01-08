@@ -9,8 +9,8 @@ ini_set('max_execution_time', '600');
 date_default_timezone_set('Asia/Tehran');
 $session = new PhpSession();
 require_once (CONFIG.'/../Global_Functions/Flare.php') ;
-$CONF_SPA=true;
-$Deb_set=false;
+$CONF_SPA=false;
+$Deb_set=true;
 $Config=[
     'URL'      => 'http://localhost/myapp/public' ,
     'DB_HOST'  => 'localhost',

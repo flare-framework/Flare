@@ -105,7 +105,7 @@
   </span> <br>
     <span>
    Page Not Found
-        <?='<br><a href="'.URL.'" title="'.URL.'">.::HOME::.</a>'?>
+        <?='<br><a href="'.URL.'" title="'.URL.'">.:: HOME ::.</a>'?>
   </span>
 
 </div>

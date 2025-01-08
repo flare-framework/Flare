@@ -130,8 +130,8 @@
 <body>
 <ul>
     <li><a class="active" href="<?=URL?>">Home</a></li>
-    <li><button onclick="sendAjax('<?=URL?>')" >Latte</button></li>
-    <li><button onclick="sendAjax('<?=URL.'flare'?>')">Ajax</button></li>
+    <li><button onclick="sendAjax('<?=URL.'404'?>')">404</button></li>
+    <li><button onclick="sendAjax('<?=URL.'lattev'?>')">lattev</button></li>
     <li><button onclick="sendAjax('<?=URL.'about'?>')" >About</button></li>
     <li><button onclick="sendAjax('<?=URL.'debug'?>')" >Debugbar</button></li>
     <li><a href="https://www.instagram.com/phpdevelop.er" target="_blank">instagram</a></li>

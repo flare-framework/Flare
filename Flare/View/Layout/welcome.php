@@ -11,7 +11,7 @@
   </span><br>
     <span   style="font-size: xx-large">
         <?php
-       echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION : 4.4.0'  ;
+       echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION : 4.4.1'  ;
         $jdf = new jdf() ;
         echo  '<br>'.$jdf->jstrftime('%c ');
         ?>
