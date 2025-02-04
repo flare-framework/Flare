@@ -1,7 +1,7 @@
 # Flare Framework
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://example.com/build-status)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/flare-framework)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/flare-framework/Flare/blob/master/license.txt)
 
 **English** | [فارسی](#فارسی)
 
