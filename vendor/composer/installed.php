@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'flare-framework/flare',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => '3364021624f9cfd538d704714e800abce2348b9c',
         'type' => 'flare-framework',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -20,9 +20,9 @@
             'dev_requirement' => false,
         ),
         'flare-framework/flare' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '3364021624f9cfd538d704714e800abce2348b9c',
             'type' => 'flare-framework',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -49,9 +49,9 @@
             'dev_requirement' => false,
         ),
         'odan/session' => array(
-            'pretty_version' => '5.x-dev',
-            'version' => '5.9999999.9999999.9999999-dev',
-            'reference' => '67f49c5e71bc3bc565eb89995c514273f0afb63d',
+            'pretty_version' => '6.x-dev',
+            'version' => '6.9999999.9999999.9999999-dev',
+            'reference' => '632366f11acb70cdfdcff1280684584a36d6b59c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../odan/session',
             'aliases' => array(),

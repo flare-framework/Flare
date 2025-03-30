@@ -2,7 +2,7 @@
 
 namespace Odan\Session;
 
-use ArrayObject;
+use ArrayAccess;
 
 /**
  * Flash messages.
@@ -10,34 +10,21 @@ use ArrayObject;
 final class Flash implements FlashInterface
 {
     /**
-     * Message storage.
-     *
-     * @var ArrayObject
+     * @var array<string, mixed>|ArrayAccess<string, mixed>
      */
-    private $storage;
+    private array|ArrayAccess $storage;
+
+    private string $storageKey;
 
     /**
-     * Message storage key.
-     *
-     * @var string
+     * @param array<string, mixed>|ArrayAccess<string, mixed> $storage
      */
-    private $storageKey;
-
-    /**
-     * The constructor.
-     *
-     * @param ArrayObject $storage The storage
-     * @param string $storageKey The flash storage key
-     */
-    public function __construct(ArrayObject $storage, string $storageKey = '_flash')
+    public function __construct(array|ArrayAccess &$storage, string $storageKey = '_flash')
     {
-        $this->storage = $storage;
+        $this->storage = &$storage;
         $this->storageKey = $storageKey;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function add(string $key, string $message): void
     {
         // Create array for this key
@@ -49,9 +36,6 @@ final class Flash implements FlashInterface
         $this->storage[$this->storageKey][$key][] = $message;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function get(string $key): array
     {
         if (!$this->has($key)) {
@@ -64,35 +48,21 @@ final class Flash implements FlashInterface
         return (array)$return;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function has(string $key): bool
     {
         return isset($this->storage[$this->storageKey][$key]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function clear(): void
     {
-        if ($this->storage->offsetExists($this->storageKey)) {
-            $this->storage->offsetUnset($this->storageKey);
-        }
+        unset($this->storage[$this->storageKey]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function set(string $key, array $messages): void
     {
         $this->storage[$this->storageKey][$key] = $messages;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function all(): array
     {
         $result = $this->storage[$this->storageKey] ?? [];

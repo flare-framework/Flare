@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9737ea06e4f537347662495dab7ab6dd",
+    "content-hash": "074626edad75bb328af506ba406741f6",
     "packages": [
         {
             "name": "bramus/router",
@@ -212,31 +212,30 @@
         },
         {
             "name": "odan/session",
-            "version": "5.x-dev",
+            "version": "6.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/odan/session.git",
-                "reference": "67f49c5e71bc3bc565eb89995c514273f0afb63d"
+                "reference": "632366f11acb70cdfdcff1280684584a36d6b59c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/odan/session/zipball/67f49c5e71bc3bc565eb89995c514273f0afb63d",
-                "reference": "67f49c5e71bc3bc565eb89995c514273f0afb63d",
+                "url": "https://api.github.com/repos/odan/session/zipball/632366f11acb70cdfdcff1280684584a36d6b59c",
+                "reference": "632366f11acb70cdfdcff1280684584a36d6b59c",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.3 || ^8.0",
-                "psr/http-message": "^1",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
+                "psr/http-message": "^1 || ^2",
                 "psr/http-server-handler": "^1",
                 "psr/http-server-middleware": "^1"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3",
                 "middlewares/utils": "^3",
-                "overtrue/phplint": "^2",
-                "phpstan/phpstan": "^1",
-                "phpunit/phpunit": "^7 || ^8 || ^9",
-                "slim/psr7": "^1",
+                "nyholm/psr7": "^1.5",
+                "phpstan/phpstan": "^2",
+                "phpunit/phpunit": "^11",
                 "squizlabs/php_codesniffer": "^3"
             },
             "type": "library",
@@ -257,9 +256,9 @@
             ],
             "support": {
                 "issues": "https://github.com/odan/session/issues",
-                "source": "https://github.com/odan/session/tree/5.x"
+                "source": "https://github.com/odan/session/tree/6.x"
             },
-            "time": "2022-01-29T21:28:55+00:00"
+            "time": "2024-12-15T13:21:05+00:00"
         },
         {
             "name": "phpmailer/phpmailer",
@@ -1047,6 +1046,6 @@
     "platform": {
         "php": ">=8.0"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

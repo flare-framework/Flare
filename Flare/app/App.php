@@ -12,7 +12,7 @@ require_once (CONFIG.'/../Global_Functions/Flare.php') ;
 $CONF_SPA=false;
 $Deb_set=true;
 $Config=[
-    'URL'      => 'http://localhost/myapp/public' ,
+    'URL'      => '' ,
     'DB_HOST'  => 'localhost',
     'DB_NAME'  => 'Flare_Db',
     'DB_USER'  => 'root',
@@ -20,7 +20,7 @@ $Config=[
     'DB_PREFIX'=>'',
     'DB_PORT'  =>3306,
 ];
-    if (isset($Config['URL'])){
+    if (!empty($Config['URL'])){
         $Config['URL'] = (substr($Config['URL'], -2) === '//') ? substr($Config['URL'], 0, -1) : rtrim($Config['URL'], '/') . '/';
         define("URL", $Config['URL']);
         }else{

@@ -109,7 +109,7 @@
         <img src="Flare.png" alt="honorary- logo" width="20%" height="20%">
     <span   style="font-size: xx-large">
         <?php
-        echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION : 4.4.1'  ;
+        echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION : 4.4.2'  ;
         $jdf = new jdf() ;
         echo  '<br>'.$jdf->jstrftime('%c ');
         ?>©  Sajjad eftekhari <?= date('Y')?>

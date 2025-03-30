@@ -1,4 +1,4 @@
-# Flare Framework 4.4.1
+# Flare Framework 
 Developer by Sajjad Eftekhari![](https://manbaenab.ir/uploads/Flare.png)
 ## What is Flare?
 
