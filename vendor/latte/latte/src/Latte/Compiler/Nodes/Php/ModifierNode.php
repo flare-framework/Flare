@@ -20,6 +20,7 @@ class ModifierNode extends Node
 		/** @var FilterNode[] */
 		public array $filters,
 		public bool $escape = false,
+		public bool $check = true,
 		public ?Position $position = null,
 	) {
 		(function (FilterNode ...$args) {})(...$filters);
@@ -46,28 +47,30 @@ class ModifierNode extends Node
 
 	public function printSimple(PrintContext $context, string $expr): string
 	{
+		$escape = $this->escape;
+		$check = $this->check;
 		foreach ($this->filters as $filter) {
 			$name = $filter->name->name;
-			if (['nocheck' => 1, 'noCheck' => 1][$name] ?? null) {
-				$nocheck = true;
+			if ($name === 'nocheck' || $name === 'noCheck') {
+				$check = false;
 			} elseif ($name === 'noescape') {
-				$noescape = true;
+				$escape = false;
 			} else {
-				if (['datastream' => 1, 'dataStream' => 1][$name] ?? null) {
-					$nocheck = true;
+				if ($name === 'datastream' || $name === 'dataStream') {
+					$check = false;
 				}
 				$expr = $filter->printSimple($context, $expr);
 			}
 		}
 
 		$escaper = $context->getEscaper();
-		if (empty($nocheck)) {
-			$expr = $escaper->sanitize($expr);
+		if ($check) {
+			$expr = $escaper->check($expr);
 		}
 
-		if ($this->escape && empty($noescape)) {
-			$expr = $escaper->escape($expr);
-		}
+		$expr = $escape
+			? $escaper->escape($expr)
+			: $escaper->escapeMandatory($expr);
 
 		return $expr;
 	}

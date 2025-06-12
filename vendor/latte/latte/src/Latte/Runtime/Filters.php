@@ -13,7 +13,6 @@ use Latte;
 use Latte\ContentType;
 use Latte\RuntimeException;
 use Nette;
-use Stringable;
 
 
 /**
@@ -24,9 +23,6 @@ class Filters
 {
 	/** @deprecated */
 	public static string $dateFormat = "j.\u{a0}n.\u{a0}Y";
-
-	/** @internal use XML syntax? */
-	public static bool $xml = false;
 
 
 	/**
@@ -60,10 +56,6 @@ class Filters
 	{
 		$double = $double && $s instanceof HtmlStringable ? false : $double;
 		$s = (string) $s;
-		if (str_contains($s, '`') && strpbrk($s, ' <>"\'') === false) {
-			$s .= ' '; // protection against innerHTML mXSS vulnerability nette/nette#1496
-		}
-
 		$s = htmlspecialchars($s, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8', $double);
 		$s = str_replace('{', '&#123;', $s);
 		return $s;
@@ -76,9 +68,12 @@ class Filters
 	public static function escapeHtmlTag($s): string
 	{
 		$s = (string) $s;
-		return preg_match('#^[a-z0-9:-]+$#i', $s)
-			? $s
-			: '"' . self::escapeHtmlAttr($s) . '"';
+		$s = htmlspecialchars($s, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8');
+		return preg_replace_callback(
+			'#[=/\s]#',
+			fn($m) => '&#' . ord($m[0]) . ';',
+			$s,
+		);
 	}
 
 
@@ -102,10 +97,36 @@ class Filters
 
 
 	/**
-	 * Escapes string for use everywhere inside XML (except for comments).
+	 * Escapes HTML for usage in <script type=text/html>
+	 */
+	public static function escapeHtmlRawTextHtml($s): string
+	{
+		if ($s instanceof HtmlStringable || $s instanceof Nette\HtmlStringable) {
+			return self::convertHtmlToHtmlRawText($s->__toString());
+		}
+
+		return htmlspecialchars((string) $s, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8');
+	}
+
+
+	/**
+	 * Escapes only quotes.
+	 */
+	public static function escapeHtmlQuotes($s): string
+	{
+		return strtr((string) $s, ['"' => '&quot;', "'" => '&apos;']);
+	}
+
+
+	/**
+	 * Escapes string for use everywhere inside XML (except for comments and tags).
 	 */
 	public static function escapeXml($s): string
 	{
+		if ($s instanceof HtmlStringable) {
+			return $s->__toString();
+		}
+
 		// XML 1.0: \x09 \x0A \x0D and C1 allowed directly, C0 forbidden
 		// XML 1.1: \x00 forbidden directly and as a character reference,
 		//   \x09 \x0A \x0D \x85 allowed directly, C0, C1 and \x7F allowed as character references
@@ -115,14 +136,16 @@ class Filters
 
 
 	/**
-	 * Escapes string for use inside XML attribute name.
+	 * Escapes string for use inside XML tag.
 	 */
-	public static function escapeXmlAttrUnquoted($s): string
+	public static function escapeXmlTag($s): string
 	{
-		$s = (string) $s;
-		return preg_match('#^[a-z0-9:-]+$#i', $s)
-			? $s
-			: '"' . self::escapeXml($s) . '"';
+		$s = self::escapeXml((string) $s);
+		return preg_replace_callback(
+			'#[=/\s]#',
+			fn($m) => '&#' . ord($m[0]) . ';',
+			$s,
+		);
 	}
 
 
@@ -145,11 +168,7 @@ class Filters
 			$s = $s->__toString();
 		}
 
-		$json = json_encode($s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-		if ($error = json_last_error()) {
-			throw new Latte\RuntimeException(json_last_error_msg(), $error);
-		}
-
+		$json = json_encode($s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR);
 		return str_replace([']]>', '<!', '</'], [']]\u003E', '\u003C!', '<\/'], $json);
 	}
 
@@ -163,15 +182,6 @@ class Filters
 		$s = str_replace("\r", '', (string) $s);
 		$s = preg_replace('#[\x00-\x08\x0B-\x1F]#', "\u{FFFD}", (string) $s);
 		return addcslashes($s, "\";\\,:\n");
-	}
-
-
-	/**
-	 * Escapes CSS/JS for usage in <script> and <style>..
-	 */
-	public static function escapeHtmlRawText($s): string
-	{
-		return preg_replace('#</(script|style)#i', '<\/$1', (string) $s);
 	}
 
 
@@ -192,9 +202,27 @@ class Filters
 	}
 
 
-	public static function nop(string $s): string
+	public static function nop($s): string
 	{
-		return $s;
+		return (string) $s;
+	}
+
+
+	/**
+	 * Converts JS and CSS for usage in <script> or <style>
+	 */
+	public static function convertJSToHtmlRawText($s): string
+	{
+		return preg_replace('#</(script|style)#i', '<\/$1', (string) $s);
+	}
+
+
+	/**
+	 * Sanitizes <script> in <script type=text/html>
+	 */
+	public static function convertHtmlToHtmlRawText(string $s): string
+	{
+		return preg_replace('#(</?)(script)#i', '$1x-$2', $s);
 	}
 
 
@@ -208,28 +236,40 @@ class Filters
 
 
 	/**
-	 * Converts HTML text to unquoted attribute. The quotation marks need to be escaped.
+	 * Converts HTML to plain text.
 	 */
-	public static function convertHtmlToUnquotedAttr(string $s): string
+	public static function convertHtmlToText(string $s): string
 	{
-		return '"' . self::escapeHtmlAttr($s, false) . '"';
-	}
-
-
-	/**
-	 * Converts HTML quoted attribute to unquoted.
-	 */
-	public static function convertHtmlAttrToUnquotedAttr(string $s): string
-	{
-		return '"' . $s . '"';
+		$s = strip_tags($s);
+		return html_entity_decode($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 	}
 
 
 	/**
 	 * Sanitizes string for use inside href attribute.
 	 */
-	public static function safeUrl(string $s): string
+	public static function safeUrl($s): string
 	{
+		$s = $s instanceof HtmlStringable
+			? self::convertHtmlToText((string) $s)
+			: (string) $s;
+
 		return preg_match('~^(?:(?:https?|ftp)://[^@]+(?:/.*)?|(?:mailto|tel|sms):.+|[/?#].*|[^:]+)$~Di', $s) ? $s : '';
+	}
+
+
+	/**
+	 * Validates HTML tag name.
+	 */
+	public static function safeTag(mixed $name, bool $xml = false): string
+	{
+		if (!is_string($name)) {
+			throw new Latte\RuntimeException('Tag name must be string, ' . get_debug_type($name) . ' given');
+		} elseif (!preg_match('~' . Latte\Compiler\TemplateLexer::ReTagName . '$~DA', $name)) {
+			throw new Latte\RuntimeException("Invalid tag name '$name'");
+		} elseif (!$xml && in_array(strtolower($name), ['style', 'script'], true)) {
+			throw new Latte\RuntimeException("Forbidden variable tag name <$name>");
+		}
+		return $name;
 	}
 }

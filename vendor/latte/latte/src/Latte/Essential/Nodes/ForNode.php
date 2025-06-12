@@ -35,7 +35,7 @@ class ForNode extends StatementNode
 	{
 		$tag->expectArguments();
 		$stream = $tag->parser->stream;
-		$node = new static;
+		$node = $tag->node = new static;
 		while (!$stream->is(';')) {
 			$node->init[] = $tag->parser->parseExpression();
 			$stream->tryConsume(',');
@@ -74,7 +74,7 @@ class ForNode extends StatementNode
 
 	public function &getIterator(): \Generator
 	{
-		foreach ($this->init as $item) {
+		foreach ($this->init as &$item) {
 			yield $item;
 		}
 
@@ -82,7 +82,7 @@ class ForNode extends StatementNode
 			yield $this->condition;
 		}
 
-		foreach ($this->next as $item) {
+		foreach ($this->next as &$item) {
 			yield $item;
 		}
 

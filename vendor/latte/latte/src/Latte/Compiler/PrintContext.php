@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Latte\Compiler;
 
-use Latte;
 use Latte\Compiler\Nodes\Php as Nodes;
 use Latte\Compiler\Nodes\Php\Expression;
 use Latte\Compiler\Nodes\Php\Scalar;
@@ -22,8 +21,6 @@ use Latte\ContentType;
  */
 final class PrintContext
 {
-	use Latte\Strict;
-
 	public array $paramsExtraction = [];
 	public array $blocks = [];
 
@@ -73,7 +70,6 @@ final class PrintContext
 		'or'  => [190, -1],
 	];
 	private int $counter = 0;
-	private Escaper $escaper;
 
 	/** @var Escaper[] */
 	private array $escaperStack = [];
@@ -81,7 +77,7 @@ final class PrintContext
 
 	public function __construct(string $contentType = ContentType::Html)
 	{
-		$this->escaper = new Escaper($contentType);
+		$this->escaperStack[] = new Escaper($contentType);
 	}
 
 
@@ -106,10 +102,11 @@ final class PrintContext
 			function ($m) use ($args) {
 				[, $pos, $fn, $var] = $m;
 				$var = substr($var, 1, -1);
+				/** @var Nodes\ModifierNode[] $args */
 				return match ($fn) {
 					'modify' => $args[$pos]->printSimple($this, $var),
 					'modifyContent' => $args[$pos]->printContentAware($this, $var),
-					'escape' => $this->escaper->escape($var),
+					'escape' => end($this->escaperStack)->escape($var),
 				};
 			},
 			$mask,
@@ -144,20 +141,19 @@ final class PrintContext
 
 	public function beginEscape(): Escaper
 	{
-		$this->escaperStack[] = $this->escaper;
-		return $this->escaper = clone $this->escaper;
+		return $this->escaperStack[] = $this->getEscaper();
 	}
 
 
 	public function restoreEscape(): void
 	{
-		$this->escaper = array_pop($this->escaperStack);
+		array_pop($this->escaperStack);
 	}
 
 
 	public function getEscaper(): Escaper
 	{
-		return clone $this->escaper;
+		return clone end($this->escaperStack);
 	}
 
 
@@ -273,9 +269,9 @@ final class PrintContext
 
 	public function objectProperty(Node $node): string
 	{
-		return $node instanceof Nodes\ExpressionNode
-			? '{' . $node->print($this) . '}'
-			: (string) $node;
+		return $node instanceof Nodes\NameNode || $node instanceof Nodes\IdentifierNode
+			? (string) $node
+			: '{' . $node->print($this) . '}';
 	}
 
 
@@ -296,9 +292,11 @@ final class PrintContext
 			|| $expr instanceof Expression\VariableNode
 			|| $expr instanceof Expression\ArrayAccessNode
 			|| $expr instanceof Expression\FunctionCallNode
+			|| $expr instanceof Expression\FunctionCallableNode
 			|| $expr instanceof Expression\MethodCallNode
-			|| $expr instanceof Expression\NullsafeMethodCallNode
-			|| $expr instanceof Expression\StaticCallNode
+			|| $expr instanceof Expression\MethodCallableNode
+			|| $expr instanceof Expression\StaticMethodCallNode
+			|| $expr instanceof Expression\StaticMethodCallableNode
 			|| $expr instanceof Expression\ArrayNode
 			? $expr->print($this)
 			: '(' . $expr->print($this) . ')';
@@ -314,12 +312,13 @@ final class PrintContext
 			|| $expr instanceof Nodes\NameNode
 			|| $expr instanceof Expression\ArrayAccessNode
 			|| $expr instanceof Expression\PropertyFetchNode
-			|| $expr instanceof Expression\NullsafePropertyFetchNode
 			|| $expr instanceof Expression\StaticPropertyFetchNode
 			|| $expr instanceof Expression\FunctionCallNode
+			|| $expr instanceof Expression\FunctionCallableNode
 			|| $expr instanceof Expression\MethodCallNode
-			|| $expr instanceof Expression\NullsafeMethodCallNode
-			|| $expr instanceof Expression\StaticCallNode
+			|| $expr instanceof Expression\MethodCallableNode
+			|| $expr instanceof Expression\StaticMethodCallNode
+			|| $expr instanceof Expression\StaticMethodCallableNode
 			|| $expr instanceof Expression\ArrayNode
 			|| $expr instanceof Scalar\StringNode
 			|| $expr instanceof Scalar\BooleanNode
@@ -328,5 +327,15 @@ final class PrintContext
 			|| $expr instanceof Expression\ClassConstantFetchNode
 			? $expr->print($this)
 			: '(' . $expr->print($this) . ')';
+	}
+
+
+	/**
+	 * @param  Nodes\ArgumentNode[]  $args
+	 */
+	public function argumentsAsArray(array $args): string
+	{
+		$items = array_map(fn(Nodes\ArgumentNode $arg) => $arg->toArrayItem(), $args);
+		return '[' . $this->implode($items) . ']';
 	}
 }

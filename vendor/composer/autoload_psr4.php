@@ -16,5 +16,5 @@ return array(
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
     'PHPMailer\\PHPMailer\\' => array($vendorDir . '/phpmailer/phpmailer/src'),
     'Odan\\Session\\' => array($vendorDir . '/odan/session/src'),
-    'DebugBar\\' => array($vendorDir . '/maximebf/debugbar/src/DebugBar'),
+    'DebugBar\\' => array($vendorDir . '/php-debugbar/php-debugbar/src/DebugBar'),
 );

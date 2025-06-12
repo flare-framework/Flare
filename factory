@@ -1,0 +1,209 @@
+#!/usr/bin/env php
+<?php
+
+if (php_sapi_name() !== 'cli') {
+    exit("This script must be run from the command line.\n");
+}
+
+$commands = $argv;
+array_shift($commands); // حذف نام فایل php
+if (empty($commands)) {
+    $logo = <<<LOGO
+    ______ _                  ______                                           _    
+   |  ____| |                |  ____|                                         | |   
+   | |__  | | __ _ _ __ ___  | |__ _ __ __ _ _ __ ___   _____      _____  _ __| | __
+   |  __| | |/ _` | '__/ _ \ |  __| '__/ _` | '_ ` _ \ / _ \ \ /\ / / _ \| '__| |/ /
+   | |    | | (_| | | |  __/ | |  | | | (_| | | | | | |  __/\ V  V / (_) | |  |   < 
+   |_|    |_|\__,_|_|  \___| |_|  |_|  \__,_|_| |_| |_|\___| \_/\_/ \___/|_|  |_|\_\
+                                                                                    
+                                                                                    
+                          Flare Framework
+LOGO;
+
+    $red = "\033[1;31m";
+    $blue = "\033[1;34m";
+    $clear = "\033[2J\033[;H"; // پاک کردن صفحه
+    $reset = "\033[0m";
+
+    for ($i = 0; $i < 6; $i++) {
+        echo $clear;
+        echo ($i % 2 === 0 ? $red : $blue) . $logo . $reset;
+        usleep(400000); // 0.4 ثانیه چشمک
+    }
+
+    echo "\n";
+
+    echo <<<USAGE
+Usage:
+  php factory make:model ClassName
+  php factory make:controller ClassName
+  php factory make:migration TableName
+  php factory migrate
+
+USAGE;
+    exit;
+}
+
+$action = $commands[0];
+$className = isset($commands[1]) ? ucfirst($commands[1]) : null;
+
+switch ($action) {
+    case 'make:model':
+    case 'make:controller':
+    case 'make:migration':
+        if (!$className) {
+            exit("Error: Class or Table name is required for {$action}.\n");
+        }
+        break;
+}
+
+switch ($action) {
+    case 'make:model':
+        createModel($className);
+        break;
+    case 'make:controller':
+        createController($className);
+        break;
+    case 'make:migration':
+        createMigration($className);
+        break;
+    case 'migrate':
+        runMigrations();
+        break;
+    default:
+        exit("Unknown command: {$action}\n");
+}
+
+function createModel($name)
+{
+    $directory = __DIR__ . "/Flare/Models";
+    $filePath = "$directory/{$name}.php";
+
+    if (!is_dir($directory)) {
+        mkdir($directory, 0777, true);
+    }
+
+    if (file_exists($filePath)) {
+        exit("Model {$name} already exists.\n");
+    }
+
+    $tableName = strtolower($name);
+
+    $stub = <<<PHP
+<?php
+
+namespace Models;
+
+use MysqliDb;
+
+class {$name} 
+{
+    protected static \$tableName = '{$tableName}';
+    protected \$db;
+
+    public function __construct()
+    {
+        global \$db; 
+        \$this->db = \$db;
+    }
+}
+PHP;
+
+    file_put_contents($filePath, $stub);
+    echo "✅ Model {$name} created successfully at Flare/Models/{$name}.php\n";
+}
+
+function createController($name)
+{
+    $directory = __DIR__ . "/Flare/Controllers";
+    $filePath = "$directory/{$name}Controller.php";
+
+    if (!is_dir($directory)) {
+        mkdir($directory, 0777, true);
+    }
+
+    if (file_exists($filePath)) {
+        exit("Controller {$name} already exists.\n");
+    }
+
+    $stub = <<<PHP
+<?php
+
+namespace Controllers;
+
+class {$name}Controller
+{
+    // تعریف کنترلر
+}
+PHP;
+
+    file_put_contents($filePath, $stub);
+    echo "✅ Controller {$name} created successfully at Flare/Controllers/{$name}Controller.php\n";
+}
+function createMigration($name)
+{
+    $directory = __DIR__ . "/Flare/Migrations";
+    $filePath = "$directory/" . date('Y_m_d_His') . "_create_" . strtolower($name) . "_table.php";
+
+    if (!is_dir($directory)) {
+        mkdir($directory, 0777, true);
+    }
+
+    $tableName = strtolower($name);
+
+    $stub = <<<PHP
+<?php
+
+require_once __DIR__ . '/../app/cli-config.php';
+
+\$table = \$db->prefix . 'users';
+
+if (!\$db->tableExists(\{$name})) {
+    \$query = "
+        CREATE TABLE IF NOT EXISTS `{\$table}` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `name` VARCHAR(100) NOT NULL,
+            `email` VARCHAR(150) NOT NULL UNIQUE,
+            `password` VARCHAR(255) NOT NULL,
+            `token` VARCHAR(255) DEFAULT NULL,
+            `photo` VARCHAR(255) DEFAULT NULL,
+            `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ";
+
+  \$result = \$db->mysqli()->query(\$query);
+    if (\$result===true) {
+        echo "✅ Table '\$table' created successfully.\\n";
+    } else {
+        echo "❌ Failed to create table '\$table'.\\n";
+    }
+} else {
+    echo "⚠️ Table '\$table' already exists.\\n";
+}
+PHP;
+
+    file_put_contents($filePath, $stub);
+    echo "✅ Migration created: {$filePath}\n";
+}
+function runMigrations()
+{
+    $migrationsPath = __DIR__ . "/Flare/Migrations";
+
+    if (!is_dir($migrationsPath)) {
+        exit("No migrations folder found at {$migrationsPath}\n");
+    }
+
+    $files = glob($migrationsPath . "/*.php");
+
+    if (empty($files)) {
+        echo "No migration files found.\n";
+        return;
+    }
+    sort($files);
+    foreach ($files as $file) {
+        echo "🔄 Running migration: " . basename($file) . "\n";
+        include $file;
+    }
+    echo "✅ All migrations executed.\n";
+}

@@ -17,21 +17,16 @@ class MethodCallNode extends Expression\MethodCallNode
 {
 	public function __construct(Expression\MethodCallNode $from)
 	{
-		parent::__construct($from->object, $from->name, $from->args, $from->position);
+		parent::__construct($from->object, $from->name, $from->args, $from->nullsafe, $from->position);
 	}
 
 
 	public function print(PrintContext $context): string
 	{
-		if ($this->isFirstClassCallable()) {
-			return '$this->global->sandbox->closure(['
-				. $this->object->print($context) . ', '
-				. $context->memberAsString($this->name) . '])';
-		}
-
 		return '$this->global->sandbox->callMethod('
 			. $this->object->print($context) . ', '
 			. $context->memberAsString($this->name) . ', '
-			. Expression\ArrayNode::fromArguments($this->args)->print($context) . ')';
+			. $context->argumentsAsArray($this->args)
+			. ', ' . var_export($this->nullsafe, true) . ')';
 	}
 }

@@ -20,8 +20,7 @@ function View2($file , $data=null){
     require_once (CONFIG.'../View/'.$file.'.php') ;
 }
 function redirect($url='') {
-    $url=$_ENV['URL'].$url ;
-    header("location: " . $url);
+    header('Location: ' . filter_var(URL.$url, FILTER_SANITIZE_URL));
     return exit();
 }
 function CautoLoader ($class) {
@@ -36,10 +35,19 @@ function CautoLoader ($class) {
         }
     }
 }
-function url($string='',$x=false):string{
-    $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-    if ($x) {return substr($url, 0, strpos($url, "?").$string);}
-    return $url.$string;
+function url($appendQuery = '', $stripQuery = false)
+{
+    $host = filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_URL);
+    $requestUri = strtok($_SERVER['REQUEST_URI'], "\n\r");
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+    $url = $scheme . '://' . $host . $requestUri;
+    if ($stripQuery) {
+        $url = strtok($url, '?');
+    }
+    if (!empty($appendQuery)) {
+        $url .= $appendQuery;
+    }
+    return $url;
 }
 function mega_copy($source, $destination) {
     if (!is_dir($destination)) {
@@ -60,4 +68,39 @@ function mega_copy($source, $destination) {
 }
 function spa(){
     return '<script type="text/javascript" n:syntax="double" src="'.URL.'FlareFunctions.js"></script>' ;
+}
+function check_input($input = null, $text = null, $method = 'AUTO', $type = 'value') {
+    $value = null;
+    if ($method === 'POST') {
+        $value = $_POST[$input] ?? null;
+    } elseif ($method === 'GET') {
+        $value = $_GET[$input] ?? null;
+    } else { // AUTO
+        $value = $_POST[$input] ?? $_GET[$input] ?? null;
+    }
+    if (is_null($value)) {
+        return '';
+    }
+    if (!is_null($text)) {
+        if ($value == $text || $text === 'checked' || $text === 'selected') {
+            return $type === 'selected' ? 'selected' : 'checked';
+        } else {
+            return '';
+        }
+    }
+    return htmlspecialchars($value);
+}
+function json_response($data = [], $status = 200)
+{
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($data);
+    exit();
+}
+function sanitizeInput($input) {
+    $input = preg_replace("/[^a-zA-Z0-9آ-ی۰-۹\s@._-]/u", "", $input);
+    $input = trim($input);
+    $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
+
+    return $input;
 }

@@ -40,10 +40,10 @@ class BlockNode extends StatementNode
 	{
 		$tag->outputMode = $tag::OutputRemoveIndentation;
 		$stream = $tag->parser->stream;
-		$node = new static;
+		$node = $tag->node = new static;
 
 		if (!$stream->is('|', Token::End)) {
-			$layer = $tag->parser->tryConsumeModifier('local')
+			$layer = $tag->parser->tryConsumeTokenBeforeUnquotedString('local')
 				? Template::LayerLocal
 				: $parser->blockLayer;
 			$stream->tryConsume('#');
@@ -52,7 +52,6 @@ class BlockNode extends StatementNode
 
 			if (!$node->block->isDynamic()) {
 				$parser->checkBlockIsUnique($node->block);
-				$tag->data->block = $node->block; // for {include}
 			}
 		}
 

@@ -17,11 +17,20 @@ use Tracy\Helpers;
 
 /**
  * BlueScreen panels for Tracy 2.x
+ * @internal
  */
 class BlueScreenPanel
 {
+	private static bool $initialized = false;
+
+
 	public static function initialize(?BlueScreen $blueScreen = null): void
 	{
+		if (self::$initialized) {
+			return;
+		}
+		self::$initialized = true;
+
 		$blueScreen ??= Tracy\Debugger::getBlueScreen();
 		$blueScreen->addPanel([self::class, 'renderError']);
 		$blueScreen->addAction([self::class, 'renderUnknownMacro']);

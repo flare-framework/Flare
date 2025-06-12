@@ -13,9 +13,9 @@ class Captcha {
     }
     // (B) DRAW THE CAPTCHA IMAGE
     //$font=base_url('arial.ttf');
-    function draw ($output=1, $width=300, $height=100, $fontsize=24, $font=PUPATH.'Orial.ttf') {
+    function draw ($output=1, $width=300, $height=100, $fontsize=24, $font=PUPATH.'Arial.ttf') {
         // (B1) OOPS
-       // base_url()
+        // base_url()
         if (!isset($_SESSION['captcha'])) { throw new Exception("CAPTCHA NOT PRIMED"); }
         // (B2) CREATE BLANK IMAGE
         $captcha = imagecreatetruecolor($width, $height);
@@ -53,14 +53,14 @@ class Captcha {
             ob_start();
             imagejpeg($captcha);
             $ob = base64_encode(ob_get_clean());
-            echo "<img src='data:image/jpeg;base64,$ob'/>";
+            echo "<img style='width: 100%;height:100%' src='data:image/jpeg;base64,$ob'/>";
         }
     }
 
     // (C) VERIFY CAPTCHA
     function verify ($check) {
         if (!isset($_SESSION['captcha'])) {
-           $khata="CAPTCHA NOT PRIMED";
+            $khata="CAPTCHA NOT PRIMED";
         }
 
         // (C2) CHECK

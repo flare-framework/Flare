@@ -1,28 +1,21 @@
-# Flare Framework 
-Developer by Sajjad Eftekhari![](https://manbaenab.ir/uploads/Flare.png)
-## What is Flare?
+# Flare Framework
 
-Flare is a PHP full-stack web framework that is light, fast, flexible, and secure. 
-More information can be found at the [official site](https://manbaenab.ir/Flare).
+Flare is a lightweight and flexible PHP framework that helps you build web applications quickly and efficiently. It provides a solid foundation for your projects while staying out of your way, allowing you to focus on what matters most: your code.
 
-This repository holds the distributable version of the framework.
-## Server Requirements
-PHP version 8 or higher is required, with the following extensions installed:
+- 🌐 GitHub: [https://github.com/flare-framework](https://github.com/flare-framework)
+- 🔗 Official Website: [https://sajjadef.ir/flare](https://sajjadef.ir/flare)
+- 👤 Created by: Sajad Eftekhari
 
-### --------------------------------------------- Flare Framework ---------------------------------
-## How to install
-### you can use composer or download from https://github.com/flare-framework/Flare/releases
-### composer create-project flare-framework/flare mysite
-# Flare built with a number of powerful and fast packages with other important features 
-### for Template system  https://latte.nette.org/en/tags
-### for  Router and Middlewares. use https://github.com/bramus/router
-### for $db and Model 
-###  https://github.com/ThingEngineer/PHP-MySQLi-Database-Class
-### https://github.com/ThingEngineer/PHP-MySQLi-Database-Class/blob/master/dbObject.md
-### and  
-### for session https://odan.github.io/session/v5/
-### for email https://github.com/PHPMailer/PHPMailer
-### for validation  https://respect-validation.readthedocs.io/en/latest/
-### for upload https://github.com/verot/class.upload.php
-### for debug https://github.com/symfony/symfony/tree/6.2/src/Symfony/Component/ErrorHandler
+---
 
+## فریم‌ورک فلر
+
+فلر یک فریم‌ورک PHP سبک و انعطاف‌پذیر است که به شما کمک می‌کند برنامه‌های وب را به سرعت و به طور کارآمد بسازید. این فریم‌ورک پایه‌ای محکم برای پروژه‌های شما فراهم می‌کند و در عین حال از سر راه شما کنار می‌رود تا روی مهم‌ترین چیز تمرکز کنید: کد خودتان.
+
+- 🌐 گیت‌هاب: [https://github.com/flare-framework](https://github.com/flare-framework)
+- 🔗 وب‌سایت رسمی: [https://sajjadef.ir/flare](https://sajjadef.ir/flare)
+- 👤 توسعه‌دهنده: سجاد افتخاری
+
+---
+
+> Start building with clarity, speed, and simplicity – with **Flare**.

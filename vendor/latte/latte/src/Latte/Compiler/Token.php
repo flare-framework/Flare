@@ -9,13 +9,9 @@ declare(strict_types=1);
 
 namespace Latte\Compiler;
 
-use Latte;
-
 
 final class Token
 {
-	use Latte\Strict;
-
 	public const
 		End = 0,
 		Text = 10000,
@@ -108,21 +104,23 @@ final class Token
 		Php_UndefinedsafeObjectOperator = 320,
 		Php_List = 321,
 		Php_Array = 322,
-		Php_DollarOpenCurlyBraces = 323,
-		Php_CurlyOpen = 324,
-		Php_PaamayimNekudotayim = 325,
-		Php_NsSeparator = 326,
-		Php_Ellipsis = 327,
-		Php_ExpandCast = 328,
-		Php_NameFullyQualified = 329,
-		Php_NameQualified = 330,
-		Php_Whitespace = 331,
-		Php_Comment = 332,
-		Php_Null = 333,
-		Php_True = 334,
-		Php_False = 335;
+		Php_StartHeredoc = 323,
+		Php_EndHeredoc = 324,
+		Php_DollarOpenCurlyBraces = 325,
+		Php_CurlyOpen = 326,
+		Php_PaamayimNekudotayim = 327,
+		Php_NsSeparator = 328,
+		Php_Ellipsis = 329,
+		Php_ExpandCast = 330,
+		Php_NameFullyQualified = 331,
+		Php_NameQualified = 332,
+		Php_Whitespace = 333,
+		Php_Comment = 334,
+		Php_Null = 335,
+		Php_True = 336,
+		Php_False = 337;
 
-	public const NAMES = [
+	public const Names = [
 		self::End => '[EOF]',
 		self::Text => 'text',
 		self::Whitespace => 'whitespace',
@@ -132,11 +130,11 @@ final class Token
 		self::Equals => "'='",
 		self::Quote => 'quote',
 
-		self::Latte_TagOpen => "'{'",
-		self::Latte_TagClose => "'}'",
+		self::Latte_TagOpen => 'Latte tag',
+		self::Latte_TagClose => 'end of Latte tag',
 		self::Latte_Name => 'tag name',
-		self::Latte_CommentOpen => "'{*'",
-		self::Latte_CommentClose => "'*}'",
+		self::Latte_CommentOpen => 'Latte comment',
+		self::Latte_CommentClose => 'end of Latte comment',
 
 		self::Html_TagOpen => 'HTML tag',
 		self::Html_TagClose => 'end of HTML tag',
@@ -211,6 +209,8 @@ final class Token
 		self::Php_UndefinedsafeObjectOperator => "'??->'",
 		self::Php_List => "'list'",
 		self::Php_Array => "'array'",
+		self::Php_StartHeredoc => 'heredoc start',
+		self::Php_EndHeredoc => 'heredoc end',
 		self::Php_DollarOpenCurlyBraces => "'\${'",
 		self::Php_CurlyOpen => "'{\$'",
 		self::Php_PaamayimNekudotayim => "'::'",

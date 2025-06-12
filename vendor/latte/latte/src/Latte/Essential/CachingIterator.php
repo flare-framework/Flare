@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace Latte\Essential;
 
-use Latte;
-
 
 /**
  * Smarter caching iterator.
@@ -29,8 +27,6 @@ use Latte;
  */
 class CachingIterator extends \CachingIterator implements \Countable
 {
-	use Latte\Strict;
-
 	private int $counter = 0;
 	private ?self $parent = null;
 
@@ -49,7 +45,7 @@ class CachingIterator extends \CachingIterator implements \Countable
 				$iterator = new \IteratorIterator($iterator);
 			}
 		} else {
-			throw new \InvalidArgumentException(sprintf('Invalid argument passed to foreach; array or Traversable expected, %s given.', is_object($iterator) ? $iterator::class : gettype($iterator)));
+			throw new \InvalidArgumentException(sprintf('Invalid argument passed to foreach; array or Traversable expected, %s given.', get_debug_type($iterator)));
 		}
 
 		parent::__construct($iterator, 0);
@@ -211,11 +207,10 @@ class CachingIterator extends \CachingIterator implements \Countable
 	 * Returns property value.
 	 * @throws \LogicException if the property is not defined.
 	 */
-	public function &__get(string $name): mixed
+	public function __get(string $name): mixed
 	{
 		if (method_exists($this, $m = 'get' . $name) || method_exists($this, $m = 'is' . $name)) {
-			$ret = $this->$m();
-			return $ret;
+			return $this->$m();
 		}
 
 		throw new \LogicException('Attempt to read undeclared property ' . static::class . "::\$$name.");

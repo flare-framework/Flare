@@ -23,6 +23,9 @@ use function is_array, is_string, count, strlen;
  */
 final class Filters
 {
+	public ?string $locale = null;
+
+
 	/**
 	 * Converts HTML to plain text.
 	 */
@@ -30,12 +33,12 @@ final class Filters
 	{
 		$info->validate([null, 'html', 'html/attr', 'xml', 'xml/attr'], __FUNCTION__);
 		$info->contentType = ContentType::Text;
-		return html_entity_decode(strip_tags((string) $s), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		return Latte\Runtime\Filters::convertHtmlToText((string) $s);
 	}
 
 
 	/**
-	 * Removes tags from HTML (but remains HTML entites).
+	 * Removes tags from HTML (but remains HTML entities).
 	 */
 	public static function stripTags(FilterInfo $info, $s): string
 	{
@@ -120,7 +123,7 @@ final class Filters
 		} elseif ($info->contentType === ContentType::Html) {
 			$s = preg_replace_callback('#<(textarea|pre).*?</\1#si', fn($m) => strtr($m[0], " \t\r\n", "\x1F\x1E\x1D\x1A"), $s);
 			if (preg_last_error()) {
-				throw new Latte\RegexpException;
+				throw new Latte\RuntimeException(preg_last_error_msg());
 			}
 
 			$s = preg_replace('#(?:^|[\r\n]+)(?=[^\r\n])#', '$0' . str_repeat($chars, $level), $s);
@@ -168,21 +171,13 @@ final class Filters
 	 */
 	public static function date(string|int|\DateTimeInterface|\DateInterval|null $time, ?string $format = null): ?string
 	{
+		$format ??= Latte\Runtime\Filters::$dateFormat;
 		if ($time == null) { // intentionally ==
 			return null;
-		}
-
-		if (!isset($format)) {
-			$format = Latte\Runtime\Filters::$dateFormat;
-		}
-
-		if ($time instanceof \DateInterval) {
+		} elseif ($time instanceof \DateInterval) {
 			return $time->format($format);
-
 		} elseif (is_numeric($time)) {
-			$time = new \DateTime('@' . $time);
-			$time->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
-
+			$time = (new \DateTime)->setTimestamp((int) $time);
 		} elseif (!$time instanceof \DateTimeInterface) {
 			$time = new \DateTime($time);
 		}
@@ -200,9 +195,77 @@ final class Filters
 
 
 	/**
-	 * Converts to human readable file size.
+	 * Date/time formatting according to locale.
 	 */
-	public static function bytes(float $bytes, int $precision = 2): string
+	public function localDate(
+		string|int|\DateTimeInterface|null $value,
+		?string $format = null,
+		?string $date = null,
+		?string $time = null,
+	): ?string
+	{
+		if ($this->locale === null) {
+			throw new Latte\RuntimeException('Filter |localDate requires the locale to be set using Engine::setLocale()');
+		} elseif ($value == null) { // intentionally ==
+			return null;
+		} elseif (is_numeric($value)) {
+			$value = (new \DateTime)->setTimestamp((int) $value);
+		} elseif (!$value instanceof \DateTimeInterface) {
+			$value = new \DateTime($value);
+			$errors = \DateTime::getLastErrors();
+			if (!empty($errors['warnings'])) {
+				throw new \InvalidArgumentException(reset($errors['warnings']));
+			}
+		}
+
+		if ($format === null) {
+			$xlt = ['' => \IntlDateFormatter::NONE, 'full' => \IntlDateFormatter::FULL, 'long' => \IntlDateFormatter::LONG, 'medium' => \IntlDateFormatter::MEDIUM, 'short' => \IntlDateFormatter::SHORT,
+				'relative-full' => \IntlDateFormatter::RELATIVE_FULL, 'relative-long' => \IntlDateFormatter::RELATIVE_LONG, 'relative-medium' => \IntlDateFormatter::RELATIVE_MEDIUM, 'relative-short' => \IntlDateFormatter::RELATIVE_SHORT];
+			$date ??= $time === null ? 'long' : null;
+			$formatter = new \IntlDateFormatter($this->locale, $xlt[$date], $xlt[$time]);
+		} else {
+			$formatter = new \IntlDateFormatter($this->locale, pattern: (new \IntlDatePatternGenerator($this->locale))->getBestPattern($format));
+		}
+
+		$res = $formatter->format($value);
+		$res = preg_replace('~(\d\.) ~', "\$1\u{a0}", $res);
+		return $res;
+	}
+
+
+	/**
+	 * Formats a number with grouped thousands and optionally decimal digits according to locale.
+	 */
+	public function number(
+		float $number,
+		string|int $patternOrDecimals = 0,
+		string $decimalSeparator = '.',
+		string $thousandsSeparator = ',',
+	): string
+	{
+		if (is_int($patternOrDecimals) && $patternOrDecimals < 0) {
+			throw new Latte\RuntimeException('Filter |number: the number of decimal must not be negative');
+		} elseif ($this->locale === null || func_num_args() > 2) {
+			if (is_string($patternOrDecimals)) {
+				throw new Latte\RuntimeException('Filter |number: using a pattern requires setting a locale via Engine::setLocale().');
+			}
+			return number_format($number, $patternOrDecimals, $decimalSeparator, $thousandsSeparator);
+		}
+
+		$formatter = new \NumberFormatter($this->locale, \NumberFormatter::DECIMAL);
+		if (is_string($patternOrDecimals)) {
+			$formatter->setPattern($patternOrDecimals);
+		} else {
+			$formatter->setAttribute(\NumberFormatter::FRACTION_DIGITS, $patternOrDecimals);
+		}
+		return $formatter->format($number);
+	}
+
+
+	/**
+	 * Converts to human-readable file size.
+	 */
+	public function bytes(float $bytes, int $precision = 2): string
 	{
 		$bytes = round($bytes);
 		$units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB'];
@@ -214,7 +277,15 @@ final class Filters
 			$bytes /= 1024;
 		}
 
-		return round($bytes, $precision) . ' ' . $unit;
+		if ($this->locale === null) {
+			$bytes = (string) round($bytes, $precision);
+		} else {
+			$formatter = new \NumberFormatter($this->locale, \NumberFormatter::DECIMAL);
+			$formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $precision);
+			$bytes = $formatter->format($bytes);
+		}
+
+		return $bytes . ' ' . $unit;
 	}
 
 
@@ -226,7 +297,8 @@ final class Filters
 		string|array $subject,
 		string|array $search,
 		string|array|null $replace = null,
-	): string {
+	): string
+	{
 		$subject = (string) $subject;
 		if (is_array($search)) {
 			if (is_array($replace)) {
@@ -249,7 +321,7 @@ final class Filters
 	{
 		$res = preg_replace($pattern, $replacement, $subject);
 		if (preg_last_error()) {
-			throw new Latte\RegexpException;
+			throw new Latte\RuntimeException(preg_last_error_msg());
 		}
 
 		return $res;
@@ -261,43 +333,36 @@ final class Filters
 	 */
 	public static function dataStream(string $data, ?string $type = null): string
 	{
-		if ($type === null) {
-			$type = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $data);
-		}
-
+		$type ??= finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $data);
 		return 'data:' . ($type ? "$type;" : '') . 'base64,' . base64_encode($data);
 	}
 
 
-	public static function breaklines(string|Stringable $s): Html
+	public static function breaklines(string|Stringable|null $s): Html
 	{
 		$s = htmlspecialchars((string) $s, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8');
-		return new Html(nl2br($s, Latte\Runtime\Filters::$xml));
+		return new Html(nl2br($s, false));
 	}
 
 
 	/**
 	 * Returns a part of string.
 	 */
-	public static function substring(string|Stringable $s, int $start, ?int $length = null): string
+	public static function substring(string|Stringable|null $s, int $start, ?int $length = null): string
 	{
 		$s = (string) $s;
-		if ($length === null) {
-			$length = self::strLength($s);
-		}
-
-		if (function_exists('mb_substr')) {
-			return mb_substr($s, $start, $length, 'UTF-8'); // MB is much faster
-		}
-
-		return iconv_substr($s, $start, $length, 'UTF-8');
+		return match (true) {
+			extension_loaded('mbstring') => mb_substr($s, $start, $length, 'UTF-8'),
+			extension_loaded('iconv') => iconv_substr($s, $start, $length, 'UTF-8'),
+			default => throw new Latte\RuntimeException("Filter |substr requires 'mbstring' or 'iconv' extension."),
+		};
 	}
 
 
 	/**
 	 * Truncates string to maximal length.
 	 */
-	public static function truncate(string|Stringable $s, int $length, string $append = "\u{2026}"): string
+	public static function truncate(string|Stringable|null $s, int $length, string $append = "\u{2026}"): string
 	{
 		$s = (string) $s;
 		if (self::strLength($s) > $length) {
@@ -371,9 +436,11 @@ final class Filters
 
 	private static function strLength(string $s): int
 	{
-		return function_exists('mb_strlen')
-			? mb_strlen($s, 'UTF-8')
-			: strlen(utf8_decode($s));
+		return match (true) {
+			extension_loaded('mbstring') => mb_strlen($s, 'UTF-8'),
+			extension_loaded('iconv') => iconv_strlen($s, 'UTF-8'),
+			default => strlen(@utf8_decode($s)), // deprecated
+		};
 	}
 
 
@@ -385,7 +452,7 @@ final class Filters
 		$charlist = preg_quote($charlist, '#');
 		$s = preg_replace('#^[' . $charlist . ']+|[' . $charlist . ']+$#Du', '', (string) $s);
 		if (preg_last_error()) {
-			throw new Latte\RegexpException;
+			throw new Latte\RuntimeException(preg_last_error_msg());
 		}
 
 		return $s;
@@ -419,7 +486,7 @@ final class Filters
 	/**
 	 * Reverses string or array.
 	 */
-	public static function reverse(string|array|\Traversable $val, bool $preserveKeys = false): string|array
+	public static function reverse(string|iterable $val, bool $preserveKeys = false): string|array
 	{
 		if (is_array($val)) {
 			return array_reverse($val, $preserveKeys);
@@ -434,7 +501,7 @@ final class Filters
 	/**
 	 * Chunks items by returning an array of arrays with the given number of items.
 	 */
-	public static function batch(array|\Traversable $list, int $length, $rest = null): \Generator
+	public static function batch(iterable $list, int $length, $rest = null): \Generator
 	{
 		$batch = [];
 		foreach ($list as $key => $value) {
@@ -458,14 +525,105 @@ final class Filters
 
 
 	/**
-	 * Sorts an array.
-	 * @param  mixed[]  $array
-	 * @return mixed[]
+	 * Sorts elements using the comparison function and preserves the key association.
+	 * @template K
+	 * @template V
+	 * @param  iterable<K, V>  $data
+	 * @return iterable<K, V>
 	 */
-	public static function sort(array $array, ?\Closure $callback = null): array
+	public function sort(
+		iterable $data,
+		?\Closure $comparison = null,
+		string|int|\Closure|null $by = null,
+		string|int|\Closure|bool $byKey = false,
+	): iterable
 	{
-		$callback ? uasort($array, $callback) : asort($array);
-		return $array;
+		if ($byKey !== false) {
+			if ($by !== null) {
+				throw new \InvalidArgumentException('Filter |sort cannot use both $by and $byKey.');
+			}
+			$by = $byKey === true ? null : $byKey;
+		}
+
+		if ($comparison) {
+		} elseif ($this->locale === null) {
+			$comparison = fn($a, $b) => $a <=> $b;
+		} else {
+			$collator = new \Collator($this->locale);
+			$comparison = fn($a, $b) => is_string($a) && is_string($b)
+				? $collator->compare($a, $b)
+				: $a <=> $b;
+		}
+
+		$comparison = match (true) {
+			$by === null => $comparison,
+			$by instanceof \Closure => fn($a, $b) => $comparison($by($a), $by($b)),
+			default => fn($a, $b) => $comparison(is_array($a) ? $a[$by] : $a->$by, is_array($b) ? $b[$by] : $b->$by),
+		};
+
+		if (is_array($data)) {
+			$byKey ? uksort($data, $comparison) : uasort($data, $comparison);
+			return $data;
+		}
+
+		$pairs = [];
+		foreach ($data as $key => $value) {
+			$pairs[] = [$key, $value];
+		}
+		uasort($pairs, fn($a, $b) => $byKey ? $comparison($a[0], $b[0]) : $comparison($a[1], $b[1]));
+
+		return new AuxiliaryIterator($pairs);
+	}
+
+
+	/**
+	 * Groups elements by the element indices and preserves the key association and order.
+	 * @template K
+	 * @template V
+	 * @param  iterable<K, V>  $data
+	 * @return iterable<iterable<K, V>>
+	 */
+	public static function group(iterable $data, string|int|\Closure $by): iterable
+	{
+		$fn = $by instanceof \Closure ? $by : fn($a) => is_array($a) ? $a[$by] : $a->$by;
+		$keys = $groups = [];
+
+		foreach ($data as $k => $v) {
+			$groupKey = $fn($v, $k);
+			if (!$groups || $prevKey !== $groupKey) {
+				$index = array_search($groupKey, $keys, true);
+				if ($index === false) {
+					$index = count($keys);
+					$keys[$index] = $groupKey;
+				}
+				$prevKey = $groupKey;
+			}
+			$groups[$index][] = [$k, $v];
+		}
+
+		return new AuxiliaryIterator(array_map(
+			fn($key, $group) => [$key, new AuxiliaryIterator($group)],
+			$keys,
+			$groups,
+		));
+	}
+
+
+	/**
+	 * Filters elements according to a given $predicate. Maintains original keys.
+	 * @template K
+	 * @template V
+	 * @param  iterable<K, V>  $iterable
+	 * @param  callable(V, K, iterable<K, V>): bool  $predicate
+	 * @return iterable<K, V>
+	 */
+	public static function filter(iterable $iterable, callable $predicate): iterable
+	{
+		foreach ($iterable as $k => $v) {
+			if ($predicate($v, $k, $iterable)) {
+				yield $k => $v;
+			}
+		}
 	}
 
 
@@ -489,7 +647,7 @@ final class Filters
 	{
 		return is_array($data)
 			? http_build_query($data, '', '&')
-			: urlencode((string) $data);
+			: urlencode($data);
 	}
 
 
@@ -521,23 +679,29 @@ final class Filters
 
 
 	/**
-	 * Returns the first item from the array or null if array is empty.
+	 * Returns the first element in an array or character in a string, or null if none.
 	 */
-	public static function first(string|array $value): mixed
+	public static function first(string|iterable $value): mixed
 	{
-		return is_array($value)
-			? (count($value) ? reset($value) : null)
-			: self::substring($value, 0, 1);
+		if (is_string($value)) {
+			return self::substring($value, 0, 1);
+		}
+
+		foreach ($value as $item) {
+			return $item;
+		}
+
+		return null;
 	}
 
 
 	/**
-	 * Returns the last item from the array or null if array is empty.
+	 * Returns the last element in an array or character in a string, or null if none.
 	 */
 	public static function last(string|array $value): mixed
 	{
 		return is_array($value)
-			? (count($value) ? end($value) : null)
+			? ($value[array_key_last($value)] ?? null)
 			: self::substring($value, -1);
 	}
 
@@ -550,7 +714,8 @@ final class Filters
 		int $start,
 		?int $length = null,
 		bool $preserveKeys = false,
-	): string|array {
+	): string|array
+	{
 		return is_array($value)
 			? array_slice($value, $start, $length, $preserveKeys)
 			: self::substring($value, $start, $length);

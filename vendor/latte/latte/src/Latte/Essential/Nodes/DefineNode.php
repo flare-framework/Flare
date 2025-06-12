@@ -13,6 +13,7 @@ use Latte\Compiler\Block;
 use Latte\Compiler\Nodes\AreaNode;
 use Latte\Compiler\Nodes\Php\Expression\AssignNode;
 use Latte\Compiler\Nodes\Php\Expression\VariableNode;
+use Latte\Compiler\Nodes\Php\ParameterNode;
 use Latte\Compiler\Nodes\Php\Scalar;
 use Latte\Compiler\Nodes\StatementNode;
 use Latte\Compiler\PrintContext;
@@ -35,17 +36,16 @@ class DefineNode extends StatementNode
 	public static function create(Tag $tag, TemplateParser $parser): \Generator
 	{
 		$tag->expectArguments();
-		$layer = $tag->parser->tryConsumeModifier('local')
+		$layer = $tag->parser->tryConsumeTokenBeforeUnquotedString('local')
 			? Template::LayerLocal
 			: $parser->blockLayer;
 		$tag->parser->stream->tryConsume('#');
 		$name = $tag->parser->parseUnquotedStringOrExpression();
 
-		$node = new static;
+		$node = $tag->node = new static;
 		$node->block = new Block($name, $layer, $tag);
 		if (!$node->block->isDynamic()) {
 			$parser->checkBlockIsUnique($node->block);
-			$tag->data->block = $node->block; // for {include}
 			$tag->parser->stream->tryConsume(',');
 			$node->block->parameters = self::parseParameters($tag);
 		}
@@ -64,18 +64,18 @@ class DefineNode extends StatementNode
 		$stream = $tag->parser->stream;
 		$params = [];
 		while (!$stream->is(Token::End)) {
-			$tag->parser->parseType();
+			$type = $tag->parser->parseType();
 
 			$save = $stream->getIndex();
 			$expr = $stream->is(Token::Php_Variable) ? $tag->parser->parseExpression() : null;
 			if ($expr instanceof VariableNode && is_string($expr->name)) {
-				$params[] = new AssignNode($expr, new Scalar\NullNode);
+				$params[] = new ParameterNode($expr, new Scalar\NullNode, $type);
 			} elseif (
 				$expr instanceof AssignNode
 				&& $expr->var instanceof VariableNode
 				&& is_string($expr->var->name)
 			) {
-				$params[] = $expr;
+				$params[] = new ParameterNode($expr->var, $expr->expr, $type);
 			} else {
 				$stream->seek($save);
 				$stream->throwUnexpectedException(addendum: ' in ' . $tag->getNotation());
@@ -124,6 +124,10 @@ class DefineNode extends StatementNode
 	public function &getIterator(): \Generator
 	{
 		yield $this->block->name;
+		foreach ($this->block->parameters as &$param) {
+			yield $param;
+		}
+
 		yield $this->content;
 	}
 }

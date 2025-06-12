@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Latte\Compiler;
 
-use Latte;
 use Latte\ContentType;
 
 
@@ -18,8 +17,6 @@ use Latte\ContentType;
  */
 final class TemplateGenerator
 {
-	use Latte\Strict;
-
 	/** @var array<string, ?array{body: string, arguments: string, returns: string, comment: ?string}> */
 	private array $methods = [];
 
@@ -36,9 +33,10 @@ final class TemplateGenerator
 	public function generate(
 		Nodes\TemplateNode $node,
 		string $className,
-		?string $comment = null,
+		?string $templateName = null,
 		bool $strictMode = false,
-	): string {
+	): string
+	{
 		$context = new PrintContext($node->contentType);
 		$code = $node->main->print($context);
 		$code = self::buildParams($code, [], '$ʟ_args', $context);
@@ -54,6 +52,10 @@ final class TemplateGenerator
 
 		if ($node->contentType !== ContentType::Html) {
 			$this->addConstant('ContentType', $node->contentType);
+		}
+
+		if ($templateName !== null && !preg_match('#\n|\?#', $templateName)) {
+			$this->addConstant('Source', $templateName);
 		}
 
 		$this->generateBlocks($context->blocks, $context);
@@ -78,7 +80,7 @@ final class TemplateGenerator
 		$code = "<?php\n\n"
 			. ($strictMode ? "declare(strict_types=1);\n\n" : '')
 			. "use Latte\\Runtime as LR;\n\n"
-			. ($comment === null ? '' : '/** ' . str_replace('*/', '* /', $comment) . " */\n")
+			. ($templateName === null ? '' : '/** source: ' . str_replace('*/', '* /', $templateName) . " */\n")
 			. "final class $className extends Latte\\Runtime\\Template\n{\n"
 			. implode("\n\n", $members)
 			. "\n}\n";
@@ -127,20 +129,21 @@ final class TemplateGenerator
 			return $body;
 		}
 
-		foreach ($params as $i => &$param) {
-			$param = $context->format(
+		$res = [];
+		foreach ($params as $i => $param) {
+			$res[] = $context->format(
 				'%node = %raw[%dump] ?? %raw[%dump] ?? %node;',
 				$param->var,
 				$cont,
 				$i,
 				$cont,
 				$param->var->name,
-				$param->expr,
+				$param->default,
 			);
 		}
 
 		$extract = $params
-			? implode('', $params) . 'unset($ʟ_args);'
+			? implode('', $res) . 'unset($ʟ_args);'
 			: "extract($cont);" . (str_contains($cont, '$this') ? '' : "unset($cont);");
 		return $extract . "\n\n" . $body;
 	}
@@ -156,7 +159,8 @@ final class TemplateGenerator
 		string $arguments = '',
 		string $returns = 'void',
 		?string $comment = null,
-	): void {
+	): void
+	{
 		$body = trim($body);
 		$this->methods[$name] = compact('body', 'arguments', 'returns', 'comment');
 	}
@@ -184,7 +188,7 @@ final class TemplateGenerator
 
 
 	/**
-	 * Returns custom properites.
+	 * Returns custom properties.
 	 * @return array<string, mixed>
 	 * @internal
 	 */

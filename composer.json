@@ -21,8 +21,8 @@
         "verot/class.upload.php": "^2.1",
         "bramus/router": "~1.6",
         "symfony/error-handler": "6.2.x-dev",
-        "latte/latte":"3.0",
-        "maximebf/debugbar": "^1.19"
+        "latte/latte":"3.0.21",
+        "php-debugbar/php-debugbar": "^1.0"
     },
     "repositories": [
         {

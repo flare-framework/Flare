@@ -21,28 +21,19 @@ class MethodCallNode extends ExpressionNode
 	public function __construct(
 		public ExpressionNode $object,
 		public IdentifierNode|ExpressionNode $name,
-		/** @var array<Php\ArgumentNode|Php\VariadicPlaceholderNode> */
+		/** @var array<Php\ArgumentNode> */
 		public array $args = [],
+		public bool $nullsafe = false,
 		public ?Position $position = null,
 	) {
-		(function (Php\ArgumentNode|Php\VariadicPlaceholderNode ...$args) {})(...$args);
-	}
-
-
-	public function isFirstClassCallable(): bool
-	{
-		return ($this->args[0] ?? null) instanceof Php\VariadicPlaceholderNode;
+		(function (Php\ArgumentNode ...$args) {})(...$args);
 	}
 
 
 	public function print(PrintContext $context): string
 	{
-		if (PHP_VERSION_ID < 80100 && $this->isFirstClassCallable()) {
-			return '[' . $this->object->print($context) . ', ' . $context->memberAsString($this->name) . ']';
-		}
-
 		return $context->dereferenceExpr($this->object)
-			. '->'
+			. ($this->nullsafe ? '?->' : '->')
 			. $context->objectProperty($this->name)
 			. '(' . $context->implode($this->args) . ')';
 	}

@@ -130,10 +130,10 @@
 <body>
 <ul>
     <li><a class="active" href="<?=URL?>">Home</a></li>
-    <li><button onclick="sendAjax('<?=URL.'404'?>')">404</button></li>
-    <li><button onclick="sendAjax('<?=URL.'lattev'?>')">lattev</button></li>
-    <li><button onclick="sendAjax('<?=URL.'about'?>')" >About</button></li>
-    <li><button onclick="sendAjax('<?=URL.'debug'?>')" >Debugbar</button></li>
+    <li><a href="<?=URL.'404'?>">404</a></li>
+    <li><a href="<?=URL.'lattev'?>">lattev</a></li>
+    <li><a href="<?=URL.'about'?>" >About</a></li>
+    <li><a href="<?=URL.'debug'?>" >Debugbar</a></li>
     <li><a href="https://www.instagram.com/phpdevelop.er" target="_blank">instagram</a></li>
     <li><a href="https://github.com/flare-framework" target="_blank">github</a></li>
 </ul>

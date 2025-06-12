@@ -9,16 +9,12 @@ declare(strict_types=1);
 
 namespace Latte\Compiler;
 
-use Latte;
-
 
 final class Position
 {
-	use Latte\Strict;
-
 	public function __construct(
-		public /*readonly*/ int $line,
-		public /*readonly*/ int $column,
+		public /*readonly*/ int $line = 1,
+		public /*readonly*/ int $column = 1,
 		public /*readonly*/ int $offset = 0,
 	) {
 	}
@@ -39,5 +35,11 @@ final class Position
 				$this->offset + strlen($str),
 			);
 		}
+	}
+
+
+	public function __toString(): string
+	{
+		return "on line $this->line" . ($this->column ? " at column $this->column" : '');
 	}
 }

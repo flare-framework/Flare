@@ -19,14 +19,14 @@ use Latte\Engine;
  */
 class Template
 {
-	use Latte\Strict;
-
 	public const
 		LayerTop = 0,
 		LayerSnippet = 'snippet',
 		LayerLocal = 'local';
 
 	public const ContentType = Latte\ContentType::Html;
+
+	public const Source = null;
 
 	public const Blocks = [];
 
@@ -58,20 +58,19 @@ class Template
 
 	/**
 	 * @param  mixed[]  $params
-	 * @param  mixed[]  $providers
 	 */
 	public function __construct(
 		Engine $engine,
 		array $params,
 		FilterExecutor $filters,
-		array $providers,
+		\stdClass $providers,
 		string $name,
 	) {
 		$this->engine = $engine;
 		$this->params = $params;
 		$this->filters = $filters;
 		$this->name = $name;
-		$this->global = (object) $providers;
+		$this->global = $providers;
 		$this->initBlockLayer(self::LayerTop);
 		$this->initBlockLayer(self::LayerLocal);
 		$this->initBlockLayer(self::LayerSnippet);
@@ -133,13 +132,15 @@ class Template
 	 */
 	public function render(?string $block = null): void
 	{
-		$params = $this->prepare();
-
-		if ($this->parentName === null && isset($this->global->coreParentFinder)) {
-			$this->parentName = ($this->global->coreParentFinder)($this);
+		foreach ($this->engine->getExtensions() as $extension) {
+			$extension->beforeRender($this);
 		}
 
-		Filters::$xml = static::ContentType === Latte\ContentType::Xml;
+		$params = $this->prepare();
+
+		if ($this->parentName === null && !$this->referringTemplate && isset($this->global->coreParentFinder)) {
+			$this->parentName = ($this->global->coreParentFinder)($this);
+		}
 
 		if ($this->referenceType === 'import') {
 			if ($this->parentName) {
@@ -169,7 +170,7 @@ class Template
 		$name = $this->engine->getLoader()->getReferredName($name, $this->name);
 		$referred = $referenceType === 'sandbox'
 			? (clone $this->engine)->setSandboxMode()->createTemplate($name, $params)
-			: $this->engine->createTemplate($name, $params);
+			: $this->engine->createTemplate($name, $params, clearCache: false);
 
 		$referred->referringTemplate = $this;
 		$referred->referenceType = $referenceType;
@@ -186,7 +187,6 @@ class Template
 			$referred->blocks[self::LayerSnippet] = &$this->blocks[self::LayerSnippet];
 		}
 
-		($this->engine->probe)($referred);
 		return $referred;
 	}
 
@@ -198,7 +198,7 @@ class Template
 	public function renderToContentType(string|\Closure|null $mod, ?string $block = null): void
 	{
 		$this->filter(
-			function () use ($block) { $this->render($block); },
+			fn() => $this->render($block),
 			$mod,
 			static::ContentType,
 			"'$this->name'",
@@ -233,7 +233,8 @@ class Template
 		array $params,
 		string|\Closure|null $mod = null,
 		int|string|null $layer = null,
-	): void {
+	): void
+	{
 		$block = $layer
 			? ($this->blocks[$layer][$name] ?? null)
 			: ($this->blocks[self::LayerLocal][$name] ?? $this->blocks[self::LayerTop][$name] ?? null);
@@ -247,7 +248,7 @@ class Template
 		}
 
 		$this->filter(
-			function () use ($block, $params): void { reset($block->functions)($params); },
+			fn() => reset($block->functions)($params),
 			$mod,
 			$block->contentType,
 			"block $name",
@@ -281,7 +282,8 @@ class Template
 		string $contentType,
 		array $functions,
 		int|string|null $layer = null,
-	): void {
+	): void
+	{
 		$block = &$this->blocks[$layer ?? self::LayerTop][$name];
 		$block ??= new Block;
 		if ($block->contentType === null) {

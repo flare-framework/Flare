@@ -10,13 +10,16 @@ declare(strict_types=1);
 namespace Latte;
 
 
+/**
+ * Common interface for all Latte exceptions.
+ */
 interface Exception
 {
 }
 
 
 /**
- * The exception occurred during Latte compilation.
+ * Template compilation failed.
  */
 class CompileException extends \Exception implements Exception
 {
@@ -37,19 +40,15 @@ class CompileException extends \Exception implements Exception
 
 
 /**
- * The exception that indicates error of the last Regexp execution.
+ * Template rendering failed.
  */
-class RegexpException extends \Exception implements Exception
+class RuntimeException extends \RuntimeException implements Exception
 {
-	public function __construct()
-	{
-		parent::__construct(preg_last_error_msg(), preg_last_error());
-	}
 }
 
 
 /**
- * Exception thrown when a not allowed construction is used in a template.
+ * Template uses forbidden function, filter or variable in sandbox mode.
  */
 class SecurityViolationException extends \Exception implements Exception
 {
@@ -61,9 +60,4 @@ class SecurityViolationException extends \Exception implements Exception
 		$this->position = $position;
 		$this->generateMessage();
 	}
-}
-
-
-class RuntimeException extends \RuntimeException implements Exception
-{
 }

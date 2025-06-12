@@ -10,13 +10,14 @@ declare(strict_types=1);
 namespace Latte\Sandbox;
 
 use Latte;
-use Latte\Compiler\ExpressionBuilder;
 use Latte\Compiler\Node;
 use Latte\Compiler\Nodes\Php;
 use Latte\Compiler\Nodes\Php\Expression;
 use Latte\Compiler\Nodes\TemplateNode;
 use Latte\Compiler\NodeTraverser;
+use Latte\Compiler\PrintContext;
 use Latte\Engine;
+use Latte\Runtime\Template;
 use Latte\SecurityViolationException;
 
 
@@ -25,8 +26,6 @@ use Latte\SecurityViolationException;
  */
 final class SandboxExtension extends Latte\Extension
 {
-	use Latte\Strict;
-
 	private ?Latte\Policy $policy;
 
 
@@ -52,8 +51,9 @@ final class SandboxExtension extends Latte\Extension
 	}
 
 
-	public function beforeRender(Engine $engine): void
+	public function beforeRender(Template $template): void
 	{
+		$engine = $template->getEngine();
 		if ($policy = $engine->getPolicy()) {
 			$engine->addProvider('sandbox', new RuntimeChecker($policy));
 		}
@@ -88,14 +88,15 @@ final class SandboxExtension extends Latte\Extension
 
 		} elseif ($node instanceof Expression\FunctionCallNode
 			&& $node->name instanceof Php\NameNode
-			&& !$node->isFirstClassCallable()
 		) {
 			if (!$this->policy->isFunctionAllowed((string) $node->name)) {
 				throw new SecurityViolationException("Function $node->name() is not allowed.", $node->position);
 
 			} elseif ($node->args) {
-				$arg = ExpressionBuilder::variable('$this')->property('global')->property('sandbox')->method('args', $node->args)
-					->build();
+				$arg = new Expression\AuxiliaryNode(
+					fn(PrintContext $context, ...$args) => '$this->global->sandbox->args(' . $context->implode($args) . ')',
+					$node->args,
+				);
 				$node->args = [new Php\ArgumentNode($arg, unpack: true)];
 			}
 
@@ -107,8 +108,10 @@ final class SandboxExtension extends Latte\Extension
 				throw new SecurityViolationException("Filter |$name is not allowed.", $node->position);
 
 			} elseif ($node->args) {
-				$arg = ExpressionBuilder::variable('$this')->property('global')->property('sandbox')->method('args', $node->args)
-					->build();
+				$arg = new Expression\AuxiliaryNode(
+					fn(PrintContext $context, ...$args) => '$this->global->sandbox->args(' . $context->implode($args) . ')',
+					$node->args,
+				);
 				$node->args = [new Php\ArgumentNode($arg, unpack: true)];
 			}
 
@@ -116,13 +119,12 @@ final class SandboxExtension extends Latte\Extension
 
 		} elseif ($node instanceof Expression\PropertyFetchNode
 			|| $node instanceof Expression\StaticPropertyFetchNode
-			|| $node instanceof Expression\NullsafePropertyFetchNode
-			|| $node instanceof Expression\UndefinedsafePropertyFetchNode
 			|| $node instanceof Expression\FunctionCallNode
+			|| $node instanceof Expression\FunctionCallableNode
 			|| $node instanceof Expression\MethodCallNode
-			|| $node instanceof Expression\StaticCallNode
-			|| $node instanceof Expression\NullsafeMethodCallNode
-			|| $node instanceof Expression\UndefinedsafeMethodCallNode
+			|| $node instanceof Expression\MethodCallableNode
+			|| $node instanceof Expression\StaticMethodCallNode
+			|| $node instanceof Expression\StaticMethodCallableNode
 		) {
 			$class = namespace\Nodes::class . strrchr($node::class, '\\');
 			return new $class($node);

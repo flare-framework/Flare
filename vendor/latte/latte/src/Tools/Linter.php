@@ -15,49 +15,45 @@ use Nette;
 
 final class Linter
 {
-	use Latte\Strict;
-
 	public function __construct(
 		private ?Latte\Engine $engine = null,
 		private bool $debug = false,
+		private bool $strict = false,
 	) {
 	}
 
 
-	public function scanDirectory(string $dir): bool
+	public function scanDirectory(string $path): bool
 	{
-		echo "Scanning $dir\n";
+		$this->initialize();
 
-		$it = new \RecursiveDirectoryIterator($dir);
-		$it = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::LEAVES_ONLY);
-		$it = new \RegexIterator($it, '~\.latte$~');
+		echo "Scanning $path\n";
 
-		$this->engine ??= $this->createEngine();
-		$this->engine->setLoader(new Latte\Loaders\StringLoader);
-
+		$files = $this->getFiles($path);
 		$counter = 0;
-		$success = true;
-		foreach ($it as $file) {
-			echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
-			$success = $this->lintLatte((string) $file) && $success;
+		$errors = 0;
+		foreach ($files as $file) {
+			$file = (string) $file;
+			echo preg_replace('~\.?[/\\\]~A', '', $file), "\x0D";
+			$errors += $this->lintLatte($file) ? 0 : 1;
+			echo str_pad('...', strlen($file)), "\x0D";
+			$counter++;
 		}
 
-		echo str_pad('', 40), "\x0D";
-		echo "Done.\n";
-		return $success;
+		echo "Done (checked $counter files, found errors in $errors)\n";
+		return !$errors;
 	}
 
 
 	private function createEngine(): Latte\Engine
 	{
 		$engine = new Latte\Engine;
+		$engine->enablePhpLinter(PHP_BINARY);
+		$engine->setStrictParsing($this->strict);
+		$engine->addExtension(new Latte\Essential\TranslatorExtension(null));
 
 		if (class_exists(Nette\Bridges\ApplicationLatte\UIExtension::class)) {
 			$engine->addExtension(new Nette\Bridges\ApplicationLatte\UIExtension(null));
-		}
-
-		if (class_exists(Nette\Bridges\ApplicationLatte\TranslatorExtension::class)) {
-			$engine->addExtension(new Nette\Bridges\ApplicationLatte\TranslatorExtension(null));
 		}
 
 		if (class_exists(Nette\Bridges\CacheLatte\CacheExtension::class)) {
@@ -69,6 +65,13 @@ final class Linter
 		}
 
 		return $engine;
+	}
+
+
+	public function getEngine(): Latte\Engine
+	{
+		$this->engine ??= $this->createEngine();
+		return $this->engine;
 	}
 
 
@@ -92,7 +95,9 @@ final class Linter
 		}
 
 		try {
-			$code = $this->engine->compile($s);
+			$this->getEngine()
+				->setLoader(new Latte\Loaders\StringLoader)
+				->compile($s);
 
 		} catch (Latte\CompileException $e) {
 			if ($this->debug) {
@@ -107,36 +112,42 @@ final class Linter
 			restore_error_handler();
 		}
 
-		if ($error = $this->lintPHP($code)) {
-			fwrite(STDERR, "[ERROR]      $file    $error\n");
-			return false;
-		}
-
 		return true;
 	}
 
 
-	private function lintPHP(string $code): ?string
+	private function initialize(): void
 	{
-		$php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
-		$stdin = tmpfile();
-		fwrite($stdin, $code);
-		fseek($stdin, 0);
-		$process = proc_open(
-			$php . ' -l -d display_errors=1',
-			[$stdin, ['pipe', 'w'], ['pipe', 'w']],
-			$pipes,
-			null,
-			null,
-			['bypass_shell' => true],
-		);
-		if (!is_resource($process)) {
-			return 'Unable to lint PHP code';
+		if (function_exists('pcntl_signal')) {
+			pcntl_signal(SIGINT, function (): void {
+				pcntl_signal(SIGINT, SIG_DFL);
+				echo "Terminated\n";
+				exit(1);
+			});
+		} elseif (function_exists('sapi_windows_set_ctrl_handler')) {
+			sapi_windows_set_ctrl_handler(function () {
+				echo "Terminated\n";
+				exit(1);
+			});
 		}
-		$error = stream_get_contents($pipes[1]);
-		if (proc_close($process)) {
-			return strip_tags(explode("\n", $error)[1]);
+
+		set_time_limit(0);
+	}
+
+
+	private function getFiles(string $path): \Iterator
+	{
+		if (is_file($path)) {
+			return new \ArrayIterator([$path]);
+
+		} elseif (preg_match('~[*?]~', $path)) {
+			return new \GlobIterator($path);
+
+		} else {
+			$it = new \RecursiveDirectoryIterator($path);
+			$it = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::LEAVES_ONLY, \RecursiveIteratorIterator::CATCH_GET_CHILD);
+			$it = new \RegexIterator($it, '~\.latte$~');
+			return $it;
 		}
-		return null;
 	}
 }

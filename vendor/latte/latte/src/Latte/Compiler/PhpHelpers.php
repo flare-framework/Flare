@@ -185,7 +185,7 @@ final class PhpHelpers
 		}
 
 		return preg_replace_callback(
-			'~\\\\([\\\\$nrtfve]|[xX][0-9a-fA-F]{1,2}|[0-7]{1,3}|u\{([0-9a-fA-F]+)\})~',
+			'~\\\([\\\$nrtfve]|[xX][0-9a-fA-F]{1,2}|[0-7]{1,3}|u\{([0-9a-fA-F]+)\})~',
 			function ($matches) {
 				$ch = $matches[1];
 				$replacements = [
@@ -223,5 +223,35 @@ final class PhpHelpers
 				. chr((($num >> 6) & 0x3F) + 0x80) . chr(($num & 0x3F) + 0x80),
 			default => throw new CompileException('Invalid UTF-8 codepoint escape sequence: Codepoint too large'),
 		};
+	}
+
+
+	public static function checkCode(string $phpBinary, string $code, string $name): void
+	{
+		$process = proc_open(
+			$phpBinary . ' -l -n',
+			[['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']],
+			$pipes,
+			null,
+			null,
+			['bypass_shell' => true],
+		);
+		if (!is_resource($process)) {
+			throw new CompileException('Unable to check that the generated PHP is correct.');
+		}
+
+		fwrite($pipes[0], $code);
+		fclose($pipes[0]);
+		$error = stream_get_contents($pipes[1]);
+		if (!proc_close($process)) {
+			return;
+		}
+		$error = strip_tags(explode("\n", $error)[1]);
+		$position = preg_match('~ on line (\d+)~', $error, $m)
+			? new Position((int) $m[1], 0)
+			: null;
+		$error = preg_replace('~(^Fatal error: | in Standard input code| on line \d+)~', '', $error);
+		throw (new CompileException('Error in generated code: ' . trim($error), $position))
+			->setSource($code, $name);
 	}
 }

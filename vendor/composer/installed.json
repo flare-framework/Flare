@@ -56,42 +56,44 @@
         },
         {
             "name": "latte/latte",
-            "version": "v3.0.0",
-            "version_normalized": "3.0.0.0",
+            "version": "v3.0.21",
+            "version_normalized": "3.0.21.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/latte.git",
-                "reference": "0a3f7fb3f930733c5cbc8d2f67943006d6ab2652"
+                "reference": "9302610109836aeb2e540cf2e457414e52597789"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/latte/zipball/0a3f7fb3f930733c5cbc8d2f67943006d6ab2652",
-                "reference": "0a3f7fb3f930733c5cbc8d2f67943006d6ab2652",
+                "url": "https://api.github.com/repos/nette/latte/zipball/9302610109836aeb2e540cf2e457414e52597789",
+                "reference": "9302610109836aeb2e540cf2e457414e52597789",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "ext-tokenizer": "*",
-                "php": ">=8.0 <8.2"
+                "php": "8.0 - 8.4"
             },
             "conflict": {
-                "nette/application": "<2.4.1"
+                "nette/application": "<3.1.7",
+                "nette/caching": "<3.1.4"
             },
             "require-dev": {
-                "nette/php-generator": "^3.3.4",
-                "nette/tester": "^2.0",
-                "nette/utils": "^3.0",
+                "nette/php-generator": "^4.0",
+                "nette/tester": "^2.5",
+                "nette/utils": "^4.0",
                 "phpstan/phpstan": "^1",
-                "tracy/tracy": "^2.3"
+                "tracy/tracy": "^2.10"
             },
             "suggest": {
                 "ext-fileinfo": "to use filter |datastream",
                 "ext-iconv": "to use filters |reverse, |substring",
+                "ext-intl": "to use Latte\\Engine::setLocale()",
                 "ext-mbstring": "to use filters like lower, upper, capitalize, ...",
                 "nette/php-generator": "to use tag {templatePrint}",
                 "nette/utils": "to use filter |webalize"
             },
-            "time": "2022-05-17T20:14:20+00:00",
+            "time": "2025-05-17T05:59:24+00:00",
             "bin": [
                 "bin/latte-lint"
             ],
@@ -137,81 +139,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nette/latte/issues",
-                "source": "https://github.com/nette/latte/tree/v3.0.0"
+                "source": "https://github.com/nette/latte/tree/v3.0.21"
             },
             "install-path": "../latte/latte"
-        },
-        {
-            "name": "maximebf/debugbar",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-debugbar/php-debugbar.git",
-                "reference": "f622fa5ed52c102097ecef4dd8a78c40df8e9285"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-debugbar/php-debugbar/zipball/f622fa5ed52c102097ecef4dd8a78c40df8e9285",
-                "reference": "f622fa5ed52c102097ecef4dd8a78c40df8e9285",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.2|^8",
-                "psr/log": "^1|^2|^3",
-                "symfony/var-dumper": "^4|^5|^6|^7"
-            },
-            "require-dev": {
-                "dbrekelmans/bdi": "^1",
-                "phpunit/phpunit": "^8|^9",
-                "symfony/panther": "^1|^2.1",
-                "twig/twig": "^1.38|^2.7|^3.0"
-            },
-            "suggest": {
-                "kriswallsmith/assetic": "The best way to manage assets",
-                "monolog/monolog": "Log using Monolog",
-                "predis/predis": "Redis storage"
-            },
-            "time": "2024-12-15T15:21:13+00:00",
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.24-dev"
-                }
-            },
-            "installation-source": "dist",
-            "autoload": {
-                "psr-4": {
-                    "DebugBar\\": "src/DebugBar/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Maxime Bouroumeau-Fuseau",
-                    "email": "maxime.bouroumeau@gmail.com",
-                    "homepage": "http://maximebf.com"
-                },
-                {
-                    "name": "Barry vd. Heuvel",
-                    "email": "barryvdh@gmail.com"
-                }
-            ],
-            "description": "Debug bar in the browser for php application",
-            "homepage": "https://github.com/php-debugbar/php-debugbar",
-            "keywords": [
-                "debug",
-                "debugbar"
-            ],
-            "support": {
-                "issues": "https://github.com/php-debugbar/php-debugbar/issues",
-                "source": "https://github.com/php-debugbar/php-debugbar/tree/master"
-            },
-            "install-path": "../maximebf/debugbar"
         },
         {
             "name": "odan/session",
@@ -267,18 +197,89 @@
             "install-path": "../odan/session"
         },
         {
-            "name": "phpmailer/phpmailer",
-            "version": "v6.9.3",
-            "version_normalized": "6.9.3.0",
+            "name": "php-debugbar/php-debugbar",
+            "version": "1.x-dev",
+            "version_normalized": "1.9999999.9999999.9999999-dev",
             "source": {
                 "type": "git",
-                "url": "https://github.com/PHPMailer/PHPMailer.git",
-                "reference": "2f5c94fe7493efc213f643c23b1b1c249d40f47e"
+                "url": "https://github.com/php-debugbar/php-debugbar.git",
+                "reference": "0615a183c5c80b8085ba24aa7a0ce0477607ff0c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/2f5c94fe7493efc213f643c23b1b1c249d40f47e",
-                "reference": "2f5c94fe7493efc213f643c23b1b1c249d40f47e",
+                "url": "https://api.github.com/repos/php-debugbar/php-debugbar/zipball/0615a183c5c80b8085ba24aa7a0ce0477607ff0c",
+                "reference": "0615a183c5c80b8085ba24aa7a0ce0477607ff0c",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8",
+                "psr/log": "^1|^2|^3",
+                "symfony/var-dumper": "^4|^5|^6|^7"
+            },
+            "require-dev": {
+                "dbrekelmans/bdi": "^1",
+                "phpunit/phpunit": "^8|^9",
+                "symfony/panther": "^1|^2.1",
+                "twig/twig": "^1.38|^2.7|^3.0"
+            },
+            "suggest": {
+                "kriswallsmith/assetic": "The best way to manage assets",
+                "monolog/monolog": "Log using Monolog",
+                "predis/predis": "Redis storage"
+            },
+            "time": "2025-02-26T14:54:52+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.23-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "DebugBar\\": "src/DebugBar/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Maxime Bouroumeau-Fuseau",
+                    "email": "maxime.bouroumeau@gmail.com",
+                    "homepage": "http://maximebf.com"
+                },
+                {
+                    "name": "Barry vd. Heuvel",
+                    "email": "barryvdh@gmail.com"
+                }
+            ],
+            "description": "Debug bar in the browser for php application",
+            "homepage": "https://github.com/maximebf/php-debugbar",
+            "keywords": [
+                "debug",
+                "debugbar"
+            ],
+            "support": {
+                "issues": "https://github.com/php-debugbar/php-debugbar/issues",
+                "source": "https://github.com/php-debugbar/php-debugbar/tree/1.x"
+            },
+            "install-path": "../php-debugbar/php-debugbar"
+        },
+        {
+            "name": "phpmailer/phpmailer",
+            "version": "v6.10.0",
+            "version_normalized": "6.10.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPMailer/PHPMailer.git",
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
                 "shasum": ""
             },
             "require": {
@@ -308,7 +309,7 @@
                 "symfony/polyfill-mbstring": "To support UTF-8 if the Mbstring PHP extension is not enabled (^1.2)",
                 "thenetworg/oauth2-azure": "Needed for Microsoft XOAUTH2 authentication"
             },
-            "time": "2024-11-24T18:04:13+00:00",
+            "time": "2025-04-24T15:19:31+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -340,7 +341,7 @@
             "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
             "support": {
                 "issues": "https://github.com/PHPMailer/PHPMailer/issues",
-                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.9.3"
+                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.10.0"
             },
             "funding": [
                 {
@@ -352,27 +353,28 @@
         },
         {
             "name": "psr/http-message",
-            "version": "1.1",
-            "version_normalized": "1.1.0.0",
+            "version": "dev-master",
+            "version_normalized": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-message.git",
-                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba"
+                "reference": "402d35bcb92c70c026d1a6a9883f06b2ead23d71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-message/zipball/cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
-                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
+                "url": "https://api.github.com/repos/php-fig/http-message/zipball/402d35bcb92c70c026d1a6a9883f06b2ead23d71",
+                "reference": "402d35bcb92c70c026d1a6a9883f06b2ead23d71",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.2 || ^8.0"
             },
-            "time": "2023-04-04T09:50:52+00:00",
+            "time": "2023-04-04T09:54:51+00:00",
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.1.x-dev"
+                    "dev-master": "2.0.x-dev"
                 }
             },
             "installation-source": "dist",
@@ -388,7 +390,7 @@
             "authors": [
                 {
                     "name": "PHP-FIG",
-                    "homepage": "http://www.php-fig.org/"
+                    "homepage": "https://www.php-fig.org/"
                 }
             ],
             "description": "Common interface for HTTP messages",
@@ -402,7 +404,7 @@
                 "response"
             ],
             "support": {
-                "source": "https://github.com/php-fig/http-message/tree/1.1"
+                "source": "https://github.com/php-fig/http-message/tree/2.0"
             },
             "install-path": "../psr/http-message"
         },
@@ -640,27 +642,27 @@
         },
         {
             "name": "respect/validation",
-            "version": "2.3.x-dev",
-            "version_normalized": "2.3.9999999.9999999-dev",
+            "version": "2.4.x-dev",
+            "version_normalized": "2.4.9999999.9999999-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "294c36ffb7c2b0f3dc23f3847844a61fa0139001"
+                "reference": "7f4b3b3ec3ccdf330dfc4567bb43698018f3562a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/294c36ffb7c2b0f3dc23f3847844a61fa0139001",
-                "reference": "294c36ffb7c2b0f3dc23f3847844a61fa0139001",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/7f4b3b3ec3ccdf330dfc4567bb43698018f3562a",
+                "reference": "7f4b3b3ec3ccdf330dfc4567bb43698018f3562a",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.1 || ^8.2",
+                "php": ">=8.1",
                 "respect/stringifier": "^0.2.0",
                 "symfony/polyfill-mbstring": "^1.2"
             },
             "require-dev": {
                 "egulias/email-validator": "^3.0",
-                "giggsey/libphonenumber-for-php-lite": "^8.13",
+                "giggsey/libphonenumber-for-php-lite": "^8.13 || ^9.0",
                 "malukenho/docheader": "^1.0",
                 "mikey179/vfsstream": "^1.6",
                 "phpstan/phpstan": "^1.9",
@@ -678,7 +680,7 @@
                 "ext-mbstring": "Multibyte String Functions",
                 "giggsey/libphonenumber-for-php-lite": "Enables the phone rule if available"
             },
-            "time": "2024-12-13T00:07:10+00:00",
+            "time": "2025-05-14T12:14:59+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
@@ -706,7 +708,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Respect/Validation/issues",
-                "source": "https://github.com/Respect/Validation/tree/2.3.11"
+                "source": "https://github.com/Respect/Validation/tree/2.4.3"
             },
             "install-path": "../respect/validation"
         },
@@ -862,15 +864,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "2369cb908b33d7b7518cce042615de430142497f"
+                "reference": "6d857f4d76bd4b343eac26d6b539585d2bc56493"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/2369cb908b33d7b7518cce042615de430142497f",
-                "reference": "2369cb908b33d7b7518cce042615de430142497f",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/6d857f4d76bd4b343eac26d6b539585d2bc56493",
+                "reference": "6d857f4d76bd4b343eac26d6b539585d2bc56493",
                 "shasum": ""
             },
             "require": {
+                "ext-iconv": "*",
                 "php": ">=7.2"
             },
             "provide": {
@@ -879,7 +882,7 @@
             "suggest": {
                 "ext-mbstring": "For best performance"
             },
-            "time": "2024-09-10T14:38:51+00:00",
+            "time": "2024-12-23T08:48:59+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {
@@ -921,7 +924,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/1.x"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.32.0"
             },
             "funding": [
                 {
@@ -946,12 +949,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "38254d5a5ac2e61f2b52f9caf54e7aa3c9d36b80"
+                "reference": "13b873feea0916070aaacc8549b02a043c791495"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/38254d5a5ac2e61f2b52f9caf54e7aa3c9d36b80",
-                "reference": "38254d5a5ac2e61f2b52f9caf54e7aa3c9d36b80",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/13b873feea0916070aaacc8549b02a043c791495",
+                "reference": "13b873feea0916070aaacc8549b02a043c791495",
                 "shasum": ""
             },
             "require": {
@@ -971,7 +974,7 @@
                 "symfony/uid": "^5.4|^6.0|^7.0",
                 "twig/twig": "^2.13|^3.0.4"
             },
-            "time": "2024-11-08T15:28:48+00:00",
+            "time": "2025-06-06T06:38:09+00:00",
             "bin": [
                 "Resources/bin/var-dump-server"
             ],

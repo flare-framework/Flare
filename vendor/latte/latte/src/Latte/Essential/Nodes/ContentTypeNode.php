@@ -24,6 +24,7 @@ class ContentTypeNode extends StatementNode
 {
 	public string $contentType;
 	public ?string $mimeType = null;
+	public bool $inScript;
 
 
 	public static function create(Tag $tag, TemplateParser $parser): static
@@ -32,11 +33,12 @@ class ContentTypeNode extends StatementNode
 		while (!$tag->parser->stream->consume()->isEnd());
 		$type = trim($tag->parser->text);
 
-		if (!$tag->isInHead() && !($tag->htmlElement?->name === 'script' && str_contains($type, 'html'))) {
+		if (!$tag->isInHead() && !($tag->htmlElement?->is('script') && str_contains($type, 'html'))) {
 			throw new CompileException('{contentType} is allowed only in template header.', $tag->position);
 		}
 
 		$node = new static;
+		$node->inScript = (bool) $tag->htmlElement;
 		$node->contentType = match (true) {
 			str_contains($type, 'html') => ContentType::Html,
 			str_contains($type, 'xml') => ContentType::Xml,
@@ -56,6 +58,11 @@ class ContentTypeNode extends StatementNode
 
 	public function print(PrintContext $context): string
 	{
+		if ($this->inScript) {
+			$context->getEscaper()->enterHtmlRaw($this->contentType);
+			return '';
+		}
+
 		$context->beginEscape()->enterContentType($this->contentType);
 
 		return $this->mimeType
@@ -70,5 +77,11 @@ class ContentTypeNode extends StatementNode
 				$this->position,
 			)
 			: '';
+	}
+
+
+	public function &getIterator(): \Generator
+	{
+		false && yield;
 	}
 }

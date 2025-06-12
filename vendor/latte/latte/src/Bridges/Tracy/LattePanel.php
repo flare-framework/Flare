@@ -10,12 +10,14 @@ declare(strict_types=1);
 namespace Latte\Bridges\Tracy;
 
 use Latte\Engine;
+use Latte\Extension;
 use Latte\Runtime\Template;
 use Tracy;
 
 
 /**
  * Bar panel for Tracy 2.x
+ * @internal
  */
 class LattePanel implements Tracy\IBarPanel
 {
@@ -27,6 +29,7 @@ class LattePanel implements Tracy\IBarPanel
 	private ?string $name = null;
 
 
+	/** @deprecated use TracyExtension see https://bit.ly/46flfDi */
 	public static function initialize(Engine $latte, ?string $name = null, ?Tracy\Bar $bar = null): void
 	{
 		$bar ??= Tracy\Debugger::getBar();
@@ -34,12 +37,32 @@ class LattePanel implements Tracy\IBarPanel
 	}
 
 
-	public function __construct(Engine $latte, ?string $name = null)
+	/** @deprecated use TracyExtension see https://bit.ly/46flfDi */
+	public function __construct(?Engine $latte = null, ?string $name = null)
 	{
 		$this->name = $name;
-		$latte->probe = function (Template $template): void {
-			$this->templates[] = $template;
-		};
+		if ($latte) {
+			$latte->addExtension(
+				new class ($this->templates) extends Extension {
+					public function __construct(
+						private array &$templates,
+					) {
+					}
+
+
+					public function beforeRender(Template $template): void
+					{
+						$this->templates[] = $template;
+					}
+				},
+			);
+		}
+	}
+
+
+	public function addTemplate(Template $template): void
+	{
+		$this->templates[] = $template;
 	}
 
 
@@ -54,7 +77,7 @@ class LattePanel implements Tracy\IBarPanel
 
 		return Tracy\Helpers::capture(function () {
 			$name = $this->name ?? basename(reset($this->templates)->getName());
-			require __DIR__ . '/templates/LattePanel.tab.phtml';
+			require __DIR__ . '/dist/tab.phtml';
 		});
 	}
 
@@ -70,7 +93,7 @@ class LattePanel implements Tracy\IBarPanel
 		return Tracy\Helpers::capture(function () {
 			$list = $this->list;
 			$dumpParameters = $this->dumpParameters;
-			require __DIR__ . '/templates/LattePanel.panel.phtml';
+			require __DIR__ . '/dist/panel.phtml';
 		});
 	}
 
