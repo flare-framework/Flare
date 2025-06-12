@@ -12,7 +12,6 @@ $router->before('GET|POST', '/debug', function() {
 
 });
 //Controllers
-
 $router->get('/','Welcome@index');
 $router->get('/lattev','Welcome@lattev');
 
