@@ -4,7 +4,12 @@ require_once __DIR__.'/Router.php' ;
 if ($Deb_set === true) {
         $DebugerGetContents  = ob_get_contents();
         ob_end_clean();
-        $DebugerGetContents= str_replace('</head>', $debugbarRenderer->renderHead().'</head>', $DebugerGetContents);
+        if (!empty($db)){
+            foreach ($db->trace as $trace) {
+                $debugbar['queries']->addMessage($trace[0]);
+            }
+        }
+    $DebugerGetContents= str_replace('</head>', $debugbarRenderer->renderHead().'</head>', $DebugerGetContents);
         echo str_replace('</body>',$debugbarRenderer->render().'</body>', $DebugerGetContents);
     $CONF_SPA=false;
 }

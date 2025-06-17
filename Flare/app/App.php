@@ -14,7 +14,7 @@ $Deb_set=true;
 $Config=[
     'URL'      => '' ,
     'DB_HOST'  => 'localhost',
-    'DB_NAME'  => 'Flare_Db',
+    'DB_NAME'  => 'flare',
     'DB_USER'  => 'root',
     'DB_PASS'  => '',
     'DB_PREFIX'=>'',
@@ -48,6 +48,10 @@ if (isset($Config['DB_NAME'])){
         'prefix' => ((isset( $Config['DB_PREFIX']))? $Config['DB_PREFIX']:'')  ,
         'charset' => 'utf8'));
     unset($Config) ;
+    if ($Deb_set==true){
+        $db->setTrace(true);
+        $debugbar->addCollector(new \DebugBar\DataCollector\MessagesCollector('queries'));
+    }
 }
 dbObject::autoload(CONFIG."/../Models");
 
