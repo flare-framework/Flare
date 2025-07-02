@@ -11,7 +11,7 @@
   </span><br>
     <span   style="font-size: xx-large">
         <?php
-       echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION :4.5.1'  ;
+       echo 'PHP VERSION' .PHP_VERSION.'| Flare VERSION :4.6'  ;
         echo  '<br>'.jdf::jdate('Y-m-d H:i:s');
         ?>
 ©  Sajjad eftekhari <?= date('Y')?>

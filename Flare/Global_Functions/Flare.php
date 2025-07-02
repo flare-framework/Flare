@@ -1,8 +1,12 @@
 <?php
-function View($filePath, $variables = array(), $print = false){
+
+use Flare_Libraries\Redirect;
+
+function View($filePath, $variables = array(), $print = false)
+{
     $output = NULL;
-    $filePath= CONFIG.'../View/'.$filePath.'.php' ;
-    if(file_exists($filePath)){
+    $filePath = CONFIG . '../View/' . $filePath . '.php';
+    if (file_exists($filePath)) {
         extract($variables);
         ob_start();
         include $filePath;
@@ -13,18 +17,21 @@ function View($filePath, $variables = array(), $print = false){
     }
     return $output;
 }
-function View2($file , $data=null){
-    if (!empty($data)){
+
+function View2($file, $data = null)
+{
+    if (!empty($data)) {
         extract($data);
     }
-    require_once (CONFIG.'../View/'.$file.'.php') ;
+    require_once(CONFIG . '../View/' . $file . '.php');
 }
-function redirect($url='') {
-    header('Location: ' . filter_var(URL.$url, FILTER_SANITIZE_URL));
-    return exit();
+
+function redirect($url = '')
+{
+    return new Redirect($url);
 }
 function CautoLoader ($class) {
-    $dirs=['Flare_Libraries','Libraries','Controllers','Middlewares'];
+    $dirs=['Flare_Libraries','Models','Libraries','Controllers','Middlewares'];
     foreach ($dirs as $dir){
         $dir="/../$dir/";
         $classNameParts = explode('\\', $class);
@@ -35,6 +42,7 @@ function CautoLoader ($class) {
         }
     }
 }
+
 function url($appendQuery = '', $stripQuery = false)
 {
     $host = filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_URL);
@@ -49,7 +57,9 @@ function url($appendQuery = '', $stripQuery = false)
     }
     return $url;
 }
-function mega_copy($source, $destination) {
+
+function mega_copy($source, $destination)
+{
     if (!is_dir($destination)) {
         mkdir($destination, 0755, true);
     }
@@ -66,10 +76,9 @@ function mega_copy($source, $destination) {
         }
     }
 }
-function spa(){
-    return '<script type="text/javascript" n:syntax="double" src="'.URL.'FlareFunctions.js"></script>' ;
-}
-function check_input($input = null, $text = null, $method = 'AUTO', $type = 'value') {
+
+function check_input($input = null, $text = null, $method = 'AUTO', $type = 'value')
+{
     $value = null;
     if ($method === 'POST') {
         $value = $_POST[$input] ?? null;
@@ -90,6 +99,7 @@ function check_input($input = null, $text = null, $method = 'AUTO', $type = 'val
     }
     return htmlspecialchars($value);
 }
+
 function json_response($data = [], $status = 200)
 {
     http_response_code($status);
@@ -97,10 +107,30 @@ function json_response($data = [], $status = 200)
     echo json_encode($data);
     exit();
 }
-function sanitizeInput($input) {
+
+function sanitizeInput($input)
+{
     $input = preg_replace("/[^a-zA-Z0-9آ-ی۰-۹\s@._-]/u", "", $input);
     $input = trim($input);
     $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
 
     return $input;
 }
+
+function loadTranslations($lang) {
+    $file =  CONFIG. "../Global_Functions/lang/{$lang}.json";
+    if (file_exists($file)) {
+        $json = file_get_contents($file);
+        return json_decode($json, true);
+    }
+    return [];
+}
+
+function translate($key,$translations = [] , $params = [], ) {
+    $text = $translations[$key] ?? $key;
+    foreach ($params as $k => $v) {
+        $text = str_replace("{" . $k . "}", $v, $text);
+    }
+    return $text;
+}
+

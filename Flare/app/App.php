@@ -12,12 +12,12 @@ require_once (CONFIG.'/../Global_Functions/Flare.php') ;
 $CONF_SPA=false;
 $Deb_set=true;
 $Config=[
-    'URL'      => '' ,
+    'URL'      => 'http://localhost/tp/sazman-flare/Falre%20-%20%204.6.0/public/' ,
     'DB_HOST'  => 'localhost',
     'DB_NAME'  => 'flare',
     'DB_USER'  => 'root',
     'DB_PASS'  => '',
-    'DB_PREFIX'=>'',
+    'DB_PREFIX'=> '',
     'DB_PORT'  =>3306,
 ];
     if (!empty($Config['URL'])){
@@ -29,13 +29,14 @@ $Config=[
     if ($Deb_set==true){
         Debug::enable();
         DebugClassLoader::enable();
-        ob_start();
+		 ob_start();
         $debugbar = new StandardDebugBar();
-       // $debugbarResources = PUPATH.'../vendor/maximebf/debugbar/src/DebugBar/Resources';
-       // mega_copy($debugbarResources, PUPATH.'DebugBar');
         $debugbarRenderer = $debugbar->getJavascriptRenderer(URL.'/DebugBar');
     }else{
         $Deb_set=false ;
+    }
+	if ($CONF_SPA===true){
+        ob_start();
     }
 spl_autoload_register('CautoLoader');
 if (isset($Config['DB_NAME'])){
@@ -46,7 +47,7 @@ if (isset($Config['DB_NAME'])){
         'db'=> $Config['DB_NAME'],
         'port' =>((isset( $Config['DB_PORT']))? $Config['DB_PORT']:3306)  ,
         'prefix' => ((isset( $Config['DB_PREFIX']))? $Config['DB_PREFIX']:'')  ,
-        'charset' => 'utf8'));
+        'charset' => 'utf8'));// or 'utf8mb4'
     unset($Config) ;
     if ($Deb_set==true){
         $db->setTrace(true);

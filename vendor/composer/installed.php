@@ -3,7 +3,7 @@
         'name' => 'flare-framework/flare',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'b1a36f8859fbd6bd5e83f60e77f78e2bfe5c7c27',
+        'reference' => '28d63bd32d0265be4ab09074d2e2f99336f7f870',
         'type' => 'flare-framework',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'flare-framework/flare' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'b1a36f8859fbd6bd5e83f60e77f78e2bfe5c7c27',
+            'reference' => '28d63bd32d0265be4ab09074d2e2f99336f7f870',
             'type' => 'flare-framework',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

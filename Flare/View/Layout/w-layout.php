@@ -133,7 +133,7 @@
     <li><a href="<?=URL.'404'?>">404</a></li>
     <li><a href="<?=URL.'lattev'?>">lattev</a></li>
     <li><a href="<?=URL.'about'?>" >About</a></li>
-    <li><a href="<?=URL.'debug'?>" >Debugbar</a></li>
+    <li><a href="https://sajjadef.ir/flare" >Documentation</a></li>
     <li><a href="https://www.instagram.com/phpdevelop.er" target="_blank">instagram</a></li>
     <li><a href="https://github.com/flare-framework" target="_blank">github</a></li>
 </ul>
