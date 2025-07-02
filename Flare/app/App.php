@@ -12,7 +12,7 @@ require_once (CONFIG.'/../Global_Functions/Flare.php') ;
 $CONF_SPA=false;
 $Deb_set=true;
 $Config=[
-    'URL'      => 'http://localhost/tp/sazman-flare/Falre%20-%20%204.6.0/public/' ,
+    'URL'      => '' ,
     'DB_HOST'  => 'localhost',
     'DB_NAME'  => 'flare',
     'DB_USER'  => 'root',
