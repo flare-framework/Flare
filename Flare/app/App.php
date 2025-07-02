@@ -54,5 +54,4 @@ if (isset($Config['DB_NAME'])){
         $debugbar->addCollector(new \DebugBar\DataCollector\MessagesCollector('queries'));
     }
 }
-dbObject::autoload(CONFIG."/../Models");
 
